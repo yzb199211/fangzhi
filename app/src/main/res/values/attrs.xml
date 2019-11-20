@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--审核单属性列-->
+    <declare-styleable name="configureInfo">
+        <attr name="leftText" format="string" />
+        <attr name="leftTextSize" format="dimension" />
+        <attr name="leftTextColor" format="color" />
+        <attr name="leftTextBold" format="boolean" />
+        <attr name="rightText" format="string" />
+        <attr name="rightTextSize" format="dimension" />
+        <attr name="rightTextColor" format="color" />
+        <attr name="rightTextBold" format="boolean" />
+    </declare-styleable>
+</resources>
