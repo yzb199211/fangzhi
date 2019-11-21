@@ -1,5 +1,6 @@
 package com.yyy.fangzhi.pubilc;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -20,6 +21,7 @@ import com.yyy.fangzhi.R;
 import com.yyy.fangzhi.dialog.LoadingDialog;
 import com.yyy.fangzhi.interfaces.OnItemClickListener;
 import com.yyy.fangzhi.interfaces.ResponseListener;
+import com.yyy.fangzhi.util.IntentUtil;
 import com.yyy.fangzhi.util.SharedPreferencesHelper;
 import com.yyy.fangzhi.util.StringUtil;
 import com.yyy.fangzhi.util.Toasts;
@@ -58,7 +60,7 @@ public class PublicListActivity extends AppCompatActivity {
     String address;
     String companyCode;
 
-    String formid;
+    int formid;
     String title;
 
     SharedPreferencesHelper preferencesHelper;
@@ -100,7 +102,7 @@ public class PublicListActivity extends AppCompatActivity {
     }
 
     private void getIntentData() {
-        formid = getIntent().getStringExtra("formid");
+        formid = getIntent().getIntExtra("formid", 0);
         title = getIntent().getStringExtra("title");
     }
 
@@ -233,7 +235,7 @@ public class PublicListActivity extends AppCompatActivity {
         adapter.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                Log.e("id", datas.get(position).getId() + "");
+
             }
         });
         rvBill.setAdapter(adapter);
@@ -246,6 +248,10 @@ public class PublicListActivity extends AppCompatActivity {
                 finish();
                 break;
             case R.id.iv_right:
+                Intent intent = IntentUtil.getIntent(PublicListActivity.this, formid);
+                intent.putExtra("title", title);
+                intent.putExtra("formid", formid);
+                startActivityForResult(intent, 0);
                 break;
         }
     }

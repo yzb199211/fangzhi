@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
     private void goNext(int id, String title) {
         startActivity(new Intent()
                 .setClass(MainActivity.this, PublicListActivity.class
-                ).putExtra("formid", id + "")
+                ).putExtra("formid", id )
                 .putExtra("title", title));
     }
 

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/default_bg_color"
+    android:orientation="vertical"
+    tools:context=".input.InputDetailActivity">
+
+    <include layout="@layout/top_layout" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_40"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_storage"
+            android:layout_width="@dimen/dp_0"
+            android:layout_height="@dimen/dp_40"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:gravity="center_vertical|left"
+            android:hint="@string/hint_storage"
+            android:paddingLeft="@dimen/dp_10"
+            android:singleLine="true"
+            android:textColor="@color/default_content_color"
+            android:textSize="@dimen/sp_14" />
+
+        <ImageView
+            android:id="@+id/iv_storage"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginRight="@dimen/dp_1"
+            android:background="@color/white"
+            android:paddingTop="@dimen/dp_10"
+            android:paddingBottom="@dimen/dp_10"
+            android:src="@mipmap/arrow_right" />
+
+        <EditText
+            android:id="@+id/et_berch"
+            android:layout_width="@dimen/dp_0"
+            android:layout_height="@dimen/dp_40"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:gravity="center_vertical|left"
+            android:hint="@string/hint_berch"
+            android:nextFocusDown="@id/et_tray"
+            android:paddingLeft="@dimen/dp_10"
+            android:singleLine="true"
+            android:textColor="@color/default_content_color"
+            android:textSize="@dimen/sp_14" />
+
+        <ImageView
+            android:id="@+id/iv_berch"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:paddingTop="@dimen/dp_10"
+            android:paddingBottom="@dimen/dp_10"
+            android:src="@mipmap/arrow_right" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/et_tray"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_40"
+        android:layout_marginTop="@dimen/dp_1"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:hint="@string/hint_tray"
+        android:nextFocusDown="@id/et_code"
+        android:paddingLeft="@dimen/dp_10"
+        android:paddingRight="@dimen/dp_10"
+        android:singleLine="true"
+        android:textColor="@color/default_content_color"
+        android:textSize="@dimen/sp_14" />
+
+    <EditText
+        android:id="@+id/et_code"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_40"
+        android:layout_marginTop="@dimen/dp_1"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:hint="@string/hint_code"
+        android:paddingLeft="@dimen/dp_10"
+        android:paddingRight="@dimen/dp_10"
+        android:singleLine="true"
+        android:textColor="@color/default_content_color"
+        android:textSize="@dimen/sp_14" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_item"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_0"
+        android:layout_marginTop="@dimen/dp_1"
+        android:layout_weight="1" />
+</LinearLayout>

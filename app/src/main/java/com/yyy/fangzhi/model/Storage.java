@@ -1,11 +1,12 @@
 package com.yyy.fangzhi.model;
 
 import com.yyy.fangzhi.util.StringUtil;
+import com.yyy.yyylibrary.wheel.interfaces.IPickerViewData;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Storage {
+public class Storage implements IPickerViewData {
 
     /**
      * iBscDataStockMRecNo : 421
@@ -28,7 +29,7 @@ public class Storage {
             length = name.length < id.length ? name.length : id.length;
             for (int i = 0; i < length; i++) {
                 BerCh item = new BerCh();
-                item.setId(id[i]);
+                item.setId(Integer.parseInt(id[i]));
                 item.setName(name[i]);
                 berChes.add(item);
             }
@@ -72,15 +73,20 @@ public class Storage {
         this.sBerChID = sBerChID;
     }
 
+    @Override
+    public String getPickerViewText() {
+        return sStockName;
+    }
+
     public static class BerCh {
-        String id;
+        int id;
         String name;
 
-        public String getId() {
+        public int getId() {
             return id;
         }
 
-        public void setId(String id) {
+        public void setId(int id) {
             this.id = id;
         }
 

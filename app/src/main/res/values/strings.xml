@@ -59,5 +59,10 @@
 
     <string name="icon_man">&#xe71b;</string>
     <string name="icon_lock">&#xe644;</string>
+
+    <string name="hint_berch"> 请输入仓位</string>
+    <string name="hint_storage"> 请输入仓库</string>
+    <string name="hint_tray"> 请输入托盘号</string>
+    <string name="hint_code"> 请输入条码</string>
 </resources>
 
