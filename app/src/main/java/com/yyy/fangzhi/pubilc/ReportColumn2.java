@@ -28,7 +28,7 @@ public  class ReportColumn2 {
         private String sValueFontColor;
         private String sValueFontSize;
         private int iValueFontBold;
-        private int iProportio;
+        private int iProportion;
         private int iDetail;
 
         public int getISerial() {
@@ -119,12 +119,12 @@ public  class ReportColumn2 {
             this.iValueFontBold = iValueFontBold;
         }
 
-        public int getIProportio() {
-            return iProportio;
+        public int getIProportion() {
+            return iProportion;
         }
 
-        public void setIProportio(int iProportio) {
-            this.iProportio = iProportio;
+        public void setIProportio(int iProportion) {
+            this.iProportion = iProportion;
         }
 
         public int getIDetail() {

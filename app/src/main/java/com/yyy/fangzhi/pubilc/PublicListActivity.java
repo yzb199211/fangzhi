@@ -18,6 +18,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.yyy.fangzhi.R;
 import com.yyy.fangzhi.dialog.LoadingDialog;
+import com.yyy.fangzhi.interfaces.OnItemClickListener;
 import com.yyy.fangzhi.interfaces.ResponseListener;
 import com.yyy.fangzhi.util.SharedPreferencesHelper;
 import com.yyy.fangzhi.util.StringUtil;
@@ -63,7 +64,9 @@ public class PublicListActivity extends AppCompatActivity {
     SharedPreferencesHelper preferencesHelper;
 
     List<ReportColumn2> reportColumns;
-    List<List<ConfigureInfo>> datas;
+    List<PublicItem> datas;
+
+    PublicAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,10 +74,10 @@ public class PublicListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_public_list);
         ButterKnife.bind(this);
         preferencesHelper = new SharedPreferencesHelper(this, getString(R.string.preferenceCache));
-        inti();
+        init();
     }
 
-    private void inti() {
+    private void init() {
         initList();
         getPreferenceData();
         getIntentData();
@@ -92,7 +95,8 @@ public class PublicListActivity extends AppCompatActivity {
         userid = (String) preferencesHelper.getSharedPreference("userid", "");
         address = (String) preferencesHelper.getSharedPreference("address", "");
         companyCode = (String) preferencesHelper.getSharedPreference("companyCode", "");
-
+        url = address + NetConfig.server + NetConfig.ReportHandler_Method;
+        ;
     }
 
     private void getIntentData() {
@@ -129,10 +133,14 @@ public class PublicListActivity extends AppCompatActivity {
                     if (jsonObject.optBoolean("success")) {
                         reportColumns.addAll(getInfo(jsonObject.optJSONObject("info").optString("ReportColumns2")));
                         initData(jsonObject.optJSONArray("data"));
+                        LoadingFinish(null);
                         refreshList();
                     } else {
                         LoadingFinish(jsonObject.optString("message"));
                     }
+                } catch (NullPointerException e) {
+                    LoadingFinish(getString(R.string.empty_data));
+                    e.printStackTrace();
                 } catch (JSONException e) {
                     LoadingFinish(getString(R.string.error_json));
                     e.printStackTrace();
@@ -152,7 +160,7 @@ public class PublicListActivity extends AppCompatActivity {
     }
 
 
-    private List<ReportColumn2> getInfo(String info) throws Exception {
+    private List<ReportColumn2> getInfo(String info) throws NullPointerException, Exception {
         List<ReportColumn2> list = new ArrayList<>();
         if (StringUtil.isNotEmpty(info)) {
             list.addAll(new Gson().fromJson(info, new TypeToken<List<ReportColumn2>>() {
@@ -167,27 +175,29 @@ public class PublicListActivity extends AppCompatActivity {
         }
     }
 
-    private List<ConfigureInfo> getItemData(JSONObject jsonObject) throws Exception {
-        List<ConfigureInfo> item = new ArrayList<>();
+    private PublicItem getItemData(JSONObject jsonObject) throws Exception {
+        PublicItem item = new PublicItem();
+        item.setId(jsonObject.optInt("iRecNo", 0));
+        List<ConfigureInfo> list = new ArrayList<>();
         for (int i = 0; i < reportColumns.size(); i++) {
             ConfigureInfo info = new ConfigureInfo();
             ReportColumn2 column = reportColumns.get(i);
             info.setSingleLine(true);
-            info.setWidthPercent(StringUtil.isPercent(column.getIProportio()));
+            info.setWidthPercent(StringUtil.isPercent(column.getIProportion()));
             info.setRow(column.getISerial());
             info.setTitleSize(getInfoTitleSize(column.getSNameFontSize()));
             info.setTitle(column.getSFieldsDisplayName());
             info.setTitleBold((column.getINameFontBold() == 1) ? true : false);
             if (StringUtil.isColor(column.getSNameFontColor()))
                 info.setTitleColor(Color.parseColor(column.getSNameFontColor()));
-
             info.setContentSize(getInfoContentSize(column.getSValueFontSize()));
-            info.setContent(jsonObject.optString(column.getSFieldsName()));
+            info.setContent(DataFormat.getData(jsonObject.optString(column.getSFieldsName()), column.getSFieldsType()));
             info.setContentBold((column.getIValueFontBold() == 1) ? true : false);
             if (StringUtil.isColor(column.getSValueFontColor()))
                 info.setTitleColor(Color.parseColor(column.getSValueFontColor()));
-            item.add(info);
+            list.add(info);
         }
+        item.setList(list);
         return item;
     }
 
@@ -211,9 +221,22 @@ public class PublicListActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
+                if (adapter == null) {
+                    initAdapter();
+                }
             }
         });
+    }
+
+    private void initAdapter() {
+        adapter = new PublicAdapter(datas, this);
+        adapter.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                Log.e("id", datas.get(position).getId() + "");
+            }
+        });
+        rvBill.setAdapter(adapter);
     }
 
     @OnClick({R.id.iv_back, R.id.iv_right})
