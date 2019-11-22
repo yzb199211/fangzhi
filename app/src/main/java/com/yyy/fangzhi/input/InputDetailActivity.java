@@ -1,5 +1,6 @@
 package com.yyy.fangzhi.input;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,15 +16,21 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.yyy.fangzhi.R;
+import com.yyy.fangzhi.dialog.JudgeDialog;
 import com.yyy.fangzhi.dialog.LoadingDialog;
 import com.yyy.fangzhi.interfaces.OnEntryListener;
 import com.yyy.fangzhi.interfaces.ResponseListener;
 import com.yyy.fangzhi.model.Storage;
+import com.yyy.fangzhi.pubilc.DataFormat;
+import com.yyy.fangzhi.pubilc.PublicAdapter;
+import com.yyy.fangzhi.pubilc.PublicItem;
+import com.yyy.fangzhi.util.KeyBoardUtil;
 import com.yyy.fangzhi.util.SharedPreferencesHelper;
 import com.yyy.fangzhi.util.StringUtil;
 import com.yyy.fangzhi.util.Toasts;
@@ -31,7 +38,9 @@ import com.yyy.fangzhi.util.net.NetConfig;
 import com.yyy.fangzhi.util.net.NetParams;
 import com.yyy.fangzhi.util.net.NetUtil;
 import com.yyy.fangzhi.util.net.Otypes;
+import com.yyy.fangzhi.view.Configure.ConfigureInfo;
 import com.yyy.fangzhi.view.EditListenerView;
+import com.yyy.fangzhi.view.recycle.RecyclerViewDivider;
 import com.yyy.yyylibrary.pick.builder.OptionsPickerBuilder;
 import com.yyy.yyylibrary.pick.listener.OnOptionsSelectListener;
 import com.yyy.yyylibrary.pick.view.OptionsPickerView;
@@ -42,11 +51,16 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static com.yyy.fangzhi.util.ResultCode.DeleteCode;
+import static com.yyy.fangzhi.util.ResultCode.RefreshCode;
 
 public class InputDetailActivity extends AppCompatActivity {
     private static final String TAG = "InputDetailActivity";
@@ -56,6 +70,8 @@ public class InputDetailActivity extends AppCompatActivity {
     ImageView ivRight;
     @BindView(R.id.tv_storage)
     TextView tvStorage;
+    @BindView(R.id.tv_berch)
+    TextView tvBerch;
     @BindView(R.id.et_berch)
     EditListenerView etBerch;
     @BindView(R.id.iv_berch)
@@ -74,6 +90,8 @@ public class InputDetailActivity extends AppCompatActivity {
     LinearLayout llStorage;
     @BindView(R.id.bottom_layout)
     LinearLayout bottomLayout;
+    @BindView(R.id.tv_delete)
+    TextView tvDelete;
 
     String userid;
     String url;
@@ -84,19 +102,28 @@ public class InputDetailActivity extends AppCompatActivity {
     int berchId;
     int iRecNo;
     int orderNo = 0;
+    int position;
 
     String title;
-    String storageId;
+    int storageId;
     String dbType;
 
     List<Storage> storages;
     List<Storage.BerCh> berChes;
     List<BarcodeColumn> barcodeColumns;
+    List<PublicItem> datas;
+    Set<String> codes;
 
     SharedPreferencesHelper preferencesHelper;
 
     private OptionsPickerView pvStorage;
     private OptionsPickerView pvBerch;
+
+    private PublicAdapter adapter;
+
+    private JudgeDialog deleteDialog;
+    private JudgeDialog saveDialog;
+    private JudgeDialog submitDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,6 +147,8 @@ public class InputDetailActivity extends AppCompatActivity {
         storages = new ArrayList<>();
         berChes = new ArrayList<>();
         barcodeColumns = new ArrayList<>();
+        datas = new ArrayList<>();
+        codes = new HashSet<>();
     }
 
     private void getPreferenceData() {
@@ -134,36 +163,49 @@ public class InputDetailActivity extends AppCompatActivity {
         formid = getIntent().getIntExtra("formid", 0);
         title = getIntent().getStringExtra("title");
         iRecNo = getIntent().getIntExtra("iRecNo", 0);
+        position = getIntent().getIntExtra("position", 0);
         dbType = iRecNo == 0 ? "add" : "modify";
     }
 
     private void initView() {
+        if (iRecNo == 0) {
+            tvDelete.setVisibility(View.INVISIBLE);
+        }
         ivRight.setVisibility(View.GONE);
         tvTitle.setText(title);
         bottomLayout.setVisibility(View.GONE);
+        initRecycle();
         setBerchListener();
         setCodeListener();
+    }
+
+    private void initRecycle() {
+        rvItem.setLayoutManager(new LinearLayoutManager(this));
+        rvItem.addItemDecoration(new RecyclerViewDivider(this, LinearLayout.VERTICAL));
     }
 
     private void setBerchListener() {
         etBerch.setOnEntryListener(new OnEntryListener() {
             @Override
             public void onEntry(View view) {
+                KeyBoardUtil.hideInput(InputDetailActivity.this);
+                etBerch.setText("");
                 if (StringUtil.isNotEmpty(etBerch.getText().toString())) {
                     if (getBerch(etBerch.getText().toString()) != 0) {
                         berchId = getBerch(etBerch.getText().toString());
                     } else {
                         Toast(getString(R.string.error_berch));
-                        etBerch.setText("");
                     }
                 }
             }
         });
+
     }
 
     private int getBerch(String s) {
         for (Storage.BerCh item : berChes) {
             if (s.equals(item.getName())) {
+                tvBerch.setText(item.getName());
                 return item.getId();
             }
         }
@@ -175,8 +217,16 @@ public class InputDetailActivity extends AppCompatActivity {
         etCode.setOnEntryListener(new OnEntryListener() {
             @Override
             public void onEntry(View view) {
-                if (StringUtil.isNotEmpty(etCode.getText().toString()))
-                    getCodeData(etCode.getText().toString());
+                KeyBoardUtil.hideInput(InputDetailActivity.this);
+                String code = etCode.getText().toString();
+                etCode.setText("");
+                if (codes.contains(code)) {
+                    Toast(getString(R.string.repeat_code));
+                    return;
+                }
+                if (StringUtil.isNotEmpty(code)) {
+                    getCodeData(code);
+                }
             }
         });
     }
@@ -250,15 +300,120 @@ public class InputDetailActivity extends AppCompatActivity {
 
     private List<NetParams> getCodeParams(String s) {
         List<NetParams> params = new ArrayList<>();
-
+        params.add(new NetParams("otype", Otypes.GetPDAMMStockProductInBarCode));
+        params.add(new NetParams("userid", userid));
+        params.add(new NetParams("database", companyCode));
+        params.add(new NetParams("sBarCode", s));
+        params.add(new NetParams("iSDContractMRecNo", orderNo + ""));
         return params;
     }
 
     private void getCodeData(String s) {
+        new NetUtil(getCodeParams(s), url, new ResponseListener() {
+            @Override
+            public void onSuccess(String string) {
+                try {
+                    JSONObject jsonObject = new JSONObject(string);
+                    if (jsonObject.optBoolean("success")) {
+                        List<PublicItem> list = initBarcodeData(jsonObject.optJSONArray("tables").optJSONArray(0));
+                        if (list != null && list.size() > 0) {
+                            codes.add(s);
+                            datas.addAll(list);
+                            refreshList();
+                        } else {
+                            LoadingFinish(getString(R.string.empty_code));
+                        }
+                    } else {
+                        LoadingFinish(jsonObject.optString("message"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_json));
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.empty_data));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_data));
+                }
+            }
+
+            @Override
+            public void onFail(IOException e) {
+                e.printStackTrace();
+                LoadingFinish(e.getMessage());
+            }
+        });
 
     }
 
-    @OnClick({R.id.iv_back, R.id.tv_storage, R.id.iv_storage, R.id.iv_berch, R.id.tv_empty})
+    private List<PublicItem> initBarcodeData(JSONArray jsonArray) throws JSONException, NullPointerException, Exception {
+        List<PublicItem> list = new ArrayList<>();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            list.add(getBarcodeItem(jsonArray.optJSONObject(i)));
+        }
+        return list;
+    }
+
+    private PublicItem getBarcodeItem(JSONObject jsonObject) throws JSONException, NullPointerException, Exception {
+        PublicItem item = new PublicItem();
+        List<ConfigureInfo> list = new ArrayList<>();
+        for (BarcodeColumn column : barcodeColumns) {
+            if (column.getIHide() == 0) {
+                ConfigureInfo info = new ConfigureInfo();
+                info.setSingleLine(true);
+                info.setWidthPercent(StringUtil.isPercent(column.getIProportion()));
+                info.setRow(column.getIRowNum());
+                info.setTitleSize(getInfoTitleSize(column.getSNameFontSize()));
+                info.setTitle(column.getSFieldsDisplayName());
+                info.setTitleBold((column.getINameFontBold() == 1) ? true : false);
+                if (StringUtil.isColor(column.getSNameFontColor()))
+                    info.setTitleColor(Color.parseColor(column.getSNameFontColor()));
+                info.setContentSize(getInfoContentSize(column.getSValueFontSize()));
+                info.setContent(DataFormat.getData(jsonObject.optString(column.getSFieldsName()), column.getSFieldsType()));
+                info.setContentBold((column.getIValueFontBold() == 1) ? true : false);
+                if (StringUtil.isColor(column.getSValueFontColor()))
+                    info.setTitleColor(Color.parseColor(column.getSValueFontColor()));
+                list.add(info);
+            }
+        }
+        item.setList(list);
+        item.setId(jsonObject.optInt("iRecNo", 0));
+        return item;
+    }
+
+    private int getInfoContentSize(String sValueFontSize) {
+        if (StringUtil.isNotEmpty(sValueFontSize) && StringUtil.isInteger(sValueFontSize)) {
+            return Integer.parseInt(sValueFontSize);
+        } else {
+            return 0;
+        }
+    }
+
+    private int getInfoTitleSize(String sNameFontSize) {
+        if (StringUtil.isNotEmpty(sNameFontSize) && StringUtil.isInteger(sNameFontSize)) {
+            return Integer.parseInt(sNameFontSize);
+        } else {
+            return 0;
+        }
+    }
+
+    private void refreshList() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (adapter == null) {
+                    adapter = new PublicAdapter(datas, InputDetailActivity.this);
+                    rvItem.setAdapter(adapter);
+                } else {
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        });
+
+    }
+
+    @OnClick({R.id.iv_back, R.id.tv_storage, R.id.iv_storage, R.id.iv_berch, R.id.tv_empty, R.id.tv_delete, R.id.tv_submit, R.id.tv_save, R.id.tv_berch})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.iv_back:
@@ -268,13 +423,173 @@ public class InputDetailActivity extends AppCompatActivity {
             case R.id.iv_storage:
                 selectStorage();
                 break;
+            case R.id.tv_berch:
             case R.id.iv_berch:
                 pvBerch.show();
                 break;
             case R.id.tv_empty:
                 getData();
                 break;
+            case R.id.tv_delete:
+                isDelete();
+                delete();
+                break;
+            case R.id.tv_save:
+                save();
+                break;
+            case R.id.tv_submit:
+                submit();
+                break;
+            default:
+                break;
         }
+    }
+
+    private void isDelete() {
+        if (deleteDialog==null){
+
+        }
+    }
+
+    private List<NetParams> submitParams() {
+        List<NetParams> params = new ArrayList<>();
+        params.add(new NetParams("otype", Otypes.MMStockProductInMSubmit));
+        params.add(new NetParams("userid", userid));
+        params.add(new NetParams("database", companyCode));
+        params.add(new NetParams("iRecNo", iRecNo + ""));
+        return params;
+    }
+
+    private void submit() {
+        new NetUtil(submitParams(), url, new ResponseListener() {
+            @Override
+            public void onSuccess(String string) {
+                try {
+                    JSONObject jsonObject = new JSONObject(string);
+                    if (jsonObject.optBoolean("success")) {
+                        setResult(DeleteCode, new Intent().putExtra("position", position));
+                        finish();
+                    } else {
+                        LoadingFinish(jsonObject.optString("message"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_json));
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.empty_data));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_data));
+                }
+            }
+
+            @Override
+            public void onFail(IOException e) {
+                e.printStackTrace();
+                LoadingFinish(e.getMessage());
+            }
+        });
+    }
+
+    private List<NetParams> saveParams() {
+        List<NetParams> params = new ArrayList<>();
+        params.add(new NetParams("otype", Otypes.MMStockProductInMSave));
+        params.add(new NetParams("userid", userid));
+        params.add(new NetParams("database", companyCode));
+        params.add(new NetParams("iRecNo", iRecNo + ""));
+        params.add(new NetParams("iBscDataStockMRecNo", storageId + ""));
+        params.add(new NetParams("iBscDataStockDRecNo", berchId + ""));
+        params.add(new NetParams("iMMStockProductInMRecNo", iRecNo + ""));
+        params.add(new NetParams("sTrayCode", etTray.getText().toString()));
+        params.add(new NetParams("sSaveType", dbType));
+        params.add(new NetParams("sBarCodes", getBarcode()));
+        return params;
+    }
+
+    private String getBarcode() {
+        String codes = "";
+        for (String code : this.codes) {
+            if (!StringUtil.isNotEmpty(codes)) {
+                codes = codes + code;
+            } else {
+                codes = codes + "," + code;
+            }
+        }
+        return codes;
+    }
+
+    private void save() {
+        new NetUtil(saveParams(), url, new ResponseListener() {
+            @Override
+            public void onSuccess(String string) {
+                try {
+                    JSONObject jsonObject = new JSONObject(string);
+                    if (jsonObject.optBoolean("success")) {
+                        setResult(RefreshCode);
+                        finish();
+                    } else {
+                        LoadingFinish(jsonObject.optString("message"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_json));
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.empty_data));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_data));
+                }
+            }
+
+            @Override
+            public void onFail(IOException e) {
+                e.printStackTrace();
+                LoadingFinish(e.getMessage());
+            }
+        });
+    }
+
+    private List<NetParams> deteleParams() {
+        List<NetParams> params = new ArrayList<>();
+        params.add(new NetParams("otype", Otypes.MMStockProductInMDelete));
+        params.add(new NetParams("userid", userid));
+        params.add(new NetParams("database", companyCode));
+        params.add(new NetParams("iRecNo", iRecNo + ""));
+        return params;
+    }
+
+    private void delete() {
+        new NetUtil(deteleParams(), url, new ResponseListener() {
+            @Override
+            public void onSuccess(String string) {
+                try {
+                    JSONObject jsonObject = new JSONObject(string);
+                    if (jsonObject.optBoolean("success")) {
+                        setResult(DeleteCode, new Intent().putExtra("position", position));
+                        finish();
+                    } else {
+                        LoadingFinish(jsonObject.optString("message"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_json));
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.empty_data));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_data));
+                }
+            }
+
+            @Override
+            public void onFail(IOException e) {
+                e.printStackTrace();
+                LoadingFinish(e.getMessage());
+            }
+        });
     }
 
     private void selectStorage() {
@@ -318,7 +633,6 @@ public class InputDetailActivity extends AppCompatActivity {
                     e.printStackTrace();
                     LoadingFinish(getString(R.string.error_data));
                 }
-
             }
 
             @Override
@@ -337,8 +651,8 @@ public class InputDetailActivity extends AppCompatActivity {
                     pvStorage = new OptionsPickerBuilder(InputDetailActivity.this, new OnOptionsSelectListener() {
                         @Override
                         public void onOptionsSelect(int options1, int options2, int options3, View v) {
-                            if (storageId != storages.get(options1).getIBscDataStockDRecNo()) {
-                                storageId = storages.get(options1).getIBscDataStockDRecNo();
+                            if (storageId != storages.get(options1).getIBscDataStockMRecNo()) {
+                                storageId = storages.get(options1).getIBscDataStockMRecNo();
                                 tvStorage.setText(storages.get(options1).getSStockName());
                                 setBerch(storages.get(options1).getBerChes());
                             }
@@ -369,9 +683,11 @@ public class InputDetailActivity extends AppCompatActivity {
             initBerchPick();
             etBerch.setVisibility(View.VISIBLE);
             ivBerch.setVisibility(View.VISIBLE);
+            tvBerch.setVisibility(View.VISIBLE);
         } else {
             etBerch.setVisibility(View.GONE);
             ivBerch.setVisibility(View.GONE);
+            tvBerch.setVisibility(View.GONE);
         }
     }
 
@@ -381,7 +697,7 @@ public class InputDetailActivity extends AppCompatActivity {
             public void onOptionsSelect(int options1, int options2, int options3, View v) {
                 if (berchId != berChes.get(options1).getId()) {
                     berchId = berChes.get(options1).getId();
-                    etBerch.setText(berChes.get(options1).getName());
+                    tvBerch.setText(berChes.get(options1).getName());
                 }
             }
         })
@@ -401,6 +717,7 @@ public class InputDetailActivity extends AppCompatActivity {
 
     private void clearBerch() {
         etBerch.setText("");
+        tvBerch.setText("");
         berchId = 0;
         berChes.clear();
         pvBerch = null;
@@ -448,7 +765,6 @@ public class InputDetailActivity extends AppCompatActivity {
                     Toast(msg);
                 }
                 LoadingDialog.cancelDialogForLoading();
-
             }
         });
     }
