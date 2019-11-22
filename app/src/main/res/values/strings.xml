@@ -17,7 +17,7 @@
 
     <string name="menu_empty">该功能暂未开放</string>
 
-    <string name="empty">暂无数据，点击刷新</string>
+    <string name="empty">点击刷新</string>
     <string name="empty_data">无数据</string>
     <string name="empty_list_data">列表返回数据为空</string>
     <!--b版本更新dialog提示-->
@@ -64,5 +64,7 @@
     <string name="hint_storage"> 请输入仓库</string>
     <string name="hint_tray"> 请输入托盘号</string>
     <string name="hint_code"> 请输入条码</string>
+
+    <string name="error_berch">无此仓位</string>
 </resources>
 

@@ -10,10 +10,28 @@
 
     <include layout="@layout/top_layout" />
 
+    <FrameLayout
+        android:id="@+id/fl_empty"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_0"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/tv_empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:padding="@dimen/dp_10"
+            android:text="@string/empty" />
+    </FrameLayout>
+
     <LinearLayout
+        android:id="@+id/ll_storage"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_40"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/tv_storage"
@@ -32,16 +50,16 @@
             android:id="@+id/iv_storage"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginRight="@dimen/dp_1"
             android:background="@color/white"
             android:paddingTop="@dimen/dp_10"
             android:paddingBottom="@dimen/dp_10"
-            android:src="@mipmap/arrow_right" />
+            app:srcCompat="@mipmap/arrow_right" />
 
-        <EditText
+        <com.yyy.fangzhi.view.EditListenerView
             android:id="@+id/et_berch"
             android:layout_width="@dimen/dp_0"
             android:layout_height="@dimen/dp_40"
+            android:layout_marginLeft="@dimen/dp_1"
             android:layout_weight="1"
             android:background="@color/white"
             android:gravity="center_vertical|left"
@@ -50,7 +68,8 @@
             android:paddingLeft="@dimen/dp_10"
             android:singleLine="true"
             android:textColor="@color/default_content_color"
-            android:textSize="@dimen/sp_14" />
+            android:textSize="@dimen/sp_14"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/iv_berch"
@@ -59,10 +78,11 @@
             android:background="@color/white"
             android:paddingTop="@dimen/dp_10"
             android:paddingBottom="@dimen/dp_10"
-            android:src="@mipmap/arrow_right" />
+            android:visibility="gone"
+            app:srcCompat="@mipmap/arrow_right" />
     </LinearLayout>
 
-    <EditText
+    <com.yyy.fangzhi.view.EditListenerView
         android:id="@+id/et_tray"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_40"
@@ -75,9 +95,10 @@
         android:paddingRight="@dimen/dp_10"
         android:singleLine="true"
         android:textColor="@color/default_content_color"
-        android:textSize="@dimen/sp_14" />
+        android:textSize="@dimen/sp_14"
+        android:visibility="gone" />
 
-    <EditText
+    <com.yyy.fangzhi.view.EditListenerView
         android:id="@+id/et_code"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_40"
@@ -89,12 +110,16 @@
         android:paddingRight="@dimen/dp_10"
         android:singleLine="true"
         android:textColor="@color/default_content_color"
-        android:textSize="@dimen/sp_14" />
+        android:textSize="@dimen/sp_14"
+        android:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_item"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_0"
         android:layout_marginTop="@dimen/dp_1"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:visibility="gone" />
+
+    <include layout="@layout/bottom_layout" />
 </LinearLayout>

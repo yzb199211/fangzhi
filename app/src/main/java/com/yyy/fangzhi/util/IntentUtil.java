@@ -1,13 +1,14 @@
 package com.yyy.fangzhi.util;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.yyy.fangzhi.input.InputDetailActivity;
 
 public class IntentUtil {
-    public static void goActivity(Activity activity, int formId) {
+    public static void goActivity(AppCompatActivity activity, int formId) {
         getIntent(activity, formId);
     }
 

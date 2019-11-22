@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/rl_top"
     android:layout_width="match_parent"
     android:layout_height="@dimen/dp_50"
@@ -15,7 +16,7 @@
         android:layout_marginTop="0dp"
         android:layout_marginBottom="0dp"
         android:padding="@dimen/dp_10"
-        android:src="@mipmap/icon_back" />
+        app:srcCompat="@mipmap/icon_back" />
 
 
     <TextView
@@ -37,7 +38,7 @@
         android:layout_alignParentRight="true"
         android:gravity="center"
         android:padding="@dimen/dp_10"
-        android:src="@mipmap/icon_add" />
+        app:srcCompat="@mipmap/icon_add" />
 
     <TextView
         android:id="@+id/tv_right"

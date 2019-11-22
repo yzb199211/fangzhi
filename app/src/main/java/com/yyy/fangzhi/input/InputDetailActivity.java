@@ -11,6 +11,7 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +21,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.yyy.fangzhi.R;
 import com.yyy.fangzhi.dialog.LoadingDialog;
+import com.yyy.fangzhi.interfaces.OnEntryListener;
 import com.yyy.fangzhi.interfaces.ResponseListener;
 import com.yyy.fangzhi.model.Storage;
 import com.yyy.fangzhi.util.SharedPreferencesHelper;
@@ -29,6 +31,7 @@ import com.yyy.fangzhi.util.net.NetConfig;
 import com.yyy.fangzhi.util.net.NetParams;
 import com.yyy.fangzhi.util.net.NetUtil;
 import com.yyy.fangzhi.util.net.Otypes;
+import com.yyy.fangzhi.view.EditListenerView;
 import com.yyy.yyylibrary.pick.builder.OptionsPickerBuilder;
 import com.yyy.yyylibrary.pick.listener.OnOptionsSelectListener;
 import com.yyy.yyylibrary.pick.view.OptionsPickerView;
@@ -54,15 +57,23 @@ public class InputDetailActivity extends AppCompatActivity {
     @BindView(R.id.tv_storage)
     TextView tvStorage;
     @BindView(R.id.et_berch)
-    EditText etBerch;
+    EditListenerView etBerch;
     @BindView(R.id.iv_berch)
     ImageView ivBerch;
     @BindView(R.id.et_tray)
-    EditText etTray;
+    EditListenerView etTray;
     @BindView(R.id.et_code)
-    EditText etCode;
+    EditListenerView etCode;
     @BindView(R.id.rv_item)
     RecyclerView rvItem;
+    @BindView(R.id.fl_empty)
+    FrameLayout flEmpty;
+    @BindView(R.id.tv_empty)
+    TextView tvEmpty;
+    @BindView(R.id.ll_storage)
+    LinearLayout llStorage;
+    @BindView(R.id.bottom_layout)
+    LinearLayout bottomLayout;
 
     String userid;
     String url;
@@ -70,17 +81,22 @@ public class InputDetailActivity extends AppCompatActivity {
     String companyCode;
 
     int formid;
+    int berchId;
+    int iRecNo;
+    int orderNo = 0;
+
     String title;
+    String storageId;
+    String dbType;
 
     List<Storage> storages;
     List<Storage.BerCh> berChes;
+    List<BarcodeColumn> barcodeColumns;
 
     SharedPreferencesHelper preferencesHelper;
 
     private OptionsPickerView pvStorage;
     private OptionsPickerView pvBerch;
-    String storageId;
-    int berchId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +105,9 @@ public class InputDetailActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         preferencesHelper = new SharedPreferencesHelper(this, getString(R.string.preferenceCache));
         init();
+        getData();
     }
+
 
     private void init() {
         initList();
@@ -101,6 +119,7 @@ public class InputDetailActivity extends AppCompatActivity {
     private void initList() {
         storages = new ArrayList<>();
         berChes = new ArrayList<>();
+        barcodeColumns = new ArrayList<>();
     }
 
     private void getPreferenceData() {
@@ -114,14 +133,132 @@ public class InputDetailActivity extends AppCompatActivity {
     private void getIntentData() {
         formid = getIntent().getIntExtra("formid", 0);
         title = getIntent().getStringExtra("title");
+        iRecNo = getIntent().getIntExtra("iRecNo", 0);
+        dbType = iRecNo == 0 ? "add" : "modify";
     }
 
     private void initView() {
         ivRight.setVisibility(View.GONE);
         tvTitle.setText(title);
+        bottomLayout.setVisibility(View.GONE);
+        setBerchListener();
+        setCodeListener();
     }
 
-    @OnClick({R.id.iv_back, R.id.tv_storage, R.id.iv_storage, R.id.iv_berch})
+    private void setBerchListener() {
+        etBerch.setOnEntryListener(new OnEntryListener() {
+            @Override
+            public void onEntry(View view) {
+                if (StringUtil.isNotEmpty(etBerch.getText().toString())) {
+                    if (getBerch(etBerch.getText().toString()) != 0) {
+                        berchId = getBerch(etBerch.getText().toString());
+                    } else {
+                        Toast(getString(R.string.error_berch));
+                        etBerch.setText("");
+                    }
+                }
+            }
+        });
+    }
+
+    private int getBerch(String s) {
+        for (Storage.BerCh item : berChes) {
+            if (s.equals(item.getName())) {
+                return item.getId();
+            }
+        }
+        return 0;
+    }
+
+
+    private void setCodeListener() {
+        etCode.setOnEntryListener(new OnEntryListener() {
+            @Override
+            public void onEntry(View view) {
+                if (StringUtil.isNotEmpty(etCode.getText().toString()))
+                    getCodeData(etCode.getText().toString());
+            }
+        });
+    }
+
+
+    private List<NetParams> getParams() {
+        List<NetParams> params = new ArrayList<>();
+        params.add(new NetParams("iFormID", formid + ""));
+        params.add(new NetParams("userid", userid));
+        params.add(new NetParams("database", companyCode));
+        params.add(new NetParams("otype", Otypes.GetFormInfo));
+        return params;
+    }
+
+    private void getData() {
+        LoadingDialog.showDialogForLoading(this);
+        new NetUtil(getParams(), address + NetConfig.server + NetConfig.MobileFormHandler, new ResponseListener() {
+            @Override
+            public void onSuccess(String string) {
+                try {
+                    JSONObject jsonObject = new JSONObject(string);
+                    if (jsonObject.optBoolean("success")) {
+                        initBarcodeColumnsData(jsonObject.optJSONObject("info").optString("formColumns"));
+                        iRecNo = iRecNo == 0 ? jsonObject.optInt("key", 0) : iRecNo;
+                        LoadingFinish(null);
+                        showView();
+                    } else {
+                        LoadingFinish(jsonObject.optString("message"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_json));
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.empty_data));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_data));
+                }
+            }
+
+            @Override
+            public void onFail(IOException e) {
+                e.printStackTrace();
+                LoadingFinish(e.getMessage());
+            }
+        });
+    }
+
+
+    private void initBarcodeColumnsData(String data) {
+        if (StringUtil.isNotEmpty(data)) {
+            barcodeColumns.addAll(new Gson().fromJson(data, new TypeToken<List<BarcodeColumn>>() {
+            }.getType()));
+        }
+    }
+
+    private void showView() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                flEmpty.setVisibility(View.GONE);
+                llStorage.setVisibility(View.VISIBLE);
+                etCode.setVisibility(View.VISIBLE);
+                etTray.setVisibility(View.VISIBLE);
+                rvItem.setVisibility(View.VISIBLE);
+                bottomLayout.setVisibility(View.VISIBLE);
+            }
+        });
+    }
+
+    private List<NetParams> getCodeParams(String s) {
+        List<NetParams> params = new ArrayList<>();
+
+        return params;
+    }
+
+    private void getCodeData(String s) {
+
+    }
+
+    @OnClick({R.id.iv_back, R.id.tv_storage, R.id.iv_storage, R.id.iv_berch, R.id.tv_empty})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.iv_back:
@@ -132,6 +269,10 @@ public class InputDetailActivity extends AppCompatActivity {
                 selectStorage();
                 break;
             case R.id.iv_berch:
+                pvBerch.show();
+                break;
+            case R.id.tv_empty:
+                getData();
                 break;
         }
     }
@@ -140,7 +281,7 @@ public class InputDetailActivity extends AppCompatActivity {
         if (storages.size() == 0) {
             getStorageData();
         } else {
-
+            pvStorage.show();
         }
     }
 
@@ -153,6 +294,7 @@ public class InputDetailActivity extends AppCompatActivity {
     }
 
     private void getStorageData() {
+        LoadingDialog.showDialogForLoading(this);
         new NetUtil(getStorageParams(), url, new ResponseListener() {
             @Override
             public void onSuccess(String string) {
@@ -161,6 +303,7 @@ public class InputDetailActivity extends AppCompatActivity {
                     if (jsonObject.optBoolean("success")) {
                         storages.addAll(new Gson().fromJson(initData(jsonObject.optJSONArray("tables")), new TypeToken<List<Storage>>() {
                         }.getType()));
+                        LoadingFinish(null);
                         initStoragePick();
                     } else {
                         LoadingFinish(jsonObject.optString("message"));
@@ -224,6 +367,11 @@ public class InputDetailActivity extends AppCompatActivity {
         if (berChes.size() > 0) {
             this.berChes.addAll(berChes);
             initBerchPick();
+            etBerch.setVisibility(View.VISIBLE);
+            ivBerch.setVisibility(View.VISIBLE);
+        } else {
+            etBerch.setVisibility(View.GONE);
+            ivBerch.setVisibility(View.GONE);
         }
     }
 
@@ -237,7 +385,7 @@ public class InputDetailActivity extends AppCompatActivity {
                 }
             }
         })
-                .setTitleText("仓库选择")
+                .setTitleText("仓位选择")
                 .setContentTextSize(18)//设置滚轮文字大小
                 .setDividerColor(Color.LTGRAY)//设置分割线的颜色
                 .setSelectOptions(0)//默认选中项

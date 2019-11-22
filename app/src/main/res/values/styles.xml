@@ -8,10 +8,10 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
     <!--加载弹窗样式-->
-    <style name="LoadingDialogStyle" parent="android:Theme.Holo.Light.Dialog">
+    <style name="LoadingDialogStyle" parent="Theme.AppCompat.Light.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowFrame">@null</item>
-        <item name="android:windowNoTitle">true</item>
+        <item name="windowNoTitle">true</item>
     </style>
     <!--判断弹窗样式-->
     <style name="JudgeDialog" parent="@android:style/Theme.Dialog">
@@ -21,7 +21,7 @@
         <!--是否浮现在activity之上-->
         <item name="android:windowIsTranslucent">false</item>
         <!--半透明-->
-        <item name="android:windowNoTitle">true</item>
+        <item name="windowNoTitle">true</item>
         <!--无标题-->
         <item name="android:windowBackground">@android:color/transparent</item>
         <!--背景透明-->

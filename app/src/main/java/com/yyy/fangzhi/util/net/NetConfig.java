@@ -7,4 +7,5 @@ public class NetConfig {
     public final static String Login_Method = "LoginHandler.ashx";
     public final static String PDAHandler = "PDAHandler.ashx";
     public final static String ReportHandler_Method = "MobileReportHandler.ashx";
+    public final static String MobileFormHandler = "MobileFormHandler.ashx";
 }

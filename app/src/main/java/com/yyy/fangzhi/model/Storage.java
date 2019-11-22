@@ -78,7 +78,7 @@ public class Storage implements IPickerViewData {
         return sStockName;
     }
 
-    public static class BerCh {
+    public static class BerCh implements IPickerViewData {
         int id;
         String name;
 
@@ -96,6 +96,11 @@ public class Storage implements IPickerViewData {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        @Override
+        public String getPickerViewText() {
+            return name;
         }
     }
 }
