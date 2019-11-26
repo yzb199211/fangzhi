@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,6 +23,7 @@ import com.yyy.fangzhi.dialog.LoadingDialog;
 import com.yyy.fangzhi.interfaces.OnItemClickListener;
 import com.yyy.fangzhi.interfaces.ResponseListener;
 import com.yyy.fangzhi.util.IntentUtil;
+import com.yyy.fangzhi.util.ResultCode;
 import com.yyy.fangzhi.util.SharedPreferencesHelper;
 import com.yyy.fangzhi.util.StringUtil;
 import com.yyy.fangzhi.util.Toasts;
@@ -235,7 +237,12 @@ public class PublicListActivity extends AppCompatActivity {
         adapter.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-
+                Intent intent = IntentUtil.getIntent(PublicListActivity.this, formid);
+                intent.putExtra("title", title);
+                intent.putExtra("formid", formid);
+                intent.putExtra("iRecNo", datas.get(position).getId());
+                intent.putExtra("position", position);
+                startActivityForResult(intent, 0);
             }
         });
         rvBill.setAdapter(adapter);
@@ -271,5 +278,27 @@ public class PublicListActivity extends AppCompatActivity {
 
     private void Toast(String msg) {
         Toasts.showShort(this, msg);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == ResultCode.DeleteCode) {
+            if (data != null) {
+                int position = data.getIntExtra("position", -1);
+                if (position > -1 && datas.size() > 0) {
+                    removeData(position);
+                }
+            }
+        } else if (requestCode == ResultCode.RefreshCode) {
+            datas.clear();
+            adapter.notifyDataSetChanged();
+            getData();
+        }
+    }
+
+    private void removeData(int position) {
+        datas.remove(position);
+        adapter.notifyDataSetChanged();
     }
 }

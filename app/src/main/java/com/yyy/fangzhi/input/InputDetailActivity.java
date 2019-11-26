@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -25,6 +24,7 @@ import com.yyy.fangzhi.R;
 import com.yyy.fangzhi.dialog.JudgeDialog;
 import com.yyy.fangzhi.dialog.LoadingDialog;
 import com.yyy.fangzhi.interfaces.OnEntryListener;
+import com.yyy.fangzhi.interfaces.OnItemClickListener;
 import com.yyy.fangzhi.interfaces.ResponseListener;
 import com.yyy.fangzhi.model.Storage;
 import com.yyy.fangzhi.pubilc.DataFormat;
@@ -112,7 +112,7 @@ public class InputDetailActivity extends AppCompatActivity {
     List<Storage.BerCh> berChes;
     List<BarcodeColumn> barcodeColumns;
     List<PublicItem> datas;
-    Set<String> codes;
+    List<String> codes;
 
     SharedPreferencesHelper preferencesHelper;
 
@@ -122,8 +122,9 @@ public class InputDetailActivity extends AppCompatActivity {
     private PublicAdapter adapter;
 
     private JudgeDialog deleteDialog;
-    private JudgeDialog saveDialog;
+    private JudgeDialog clearDialog;
     private JudgeDialog submitDialog;
+    private JudgeDialog removeDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,7 +149,7 @@ public class InputDetailActivity extends AppCompatActivity {
         berChes = new ArrayList<>();
         barcodeColumns = new ArrayList<>();
         datas = new ArrayList<>();
-        codes = new HashSet<>();
+        codes = new ArrayList<>();
     }
 
     private void getPreferenceData() {
@@ -163,7 +164,7 @@ public class InputDetailActivity extends AppCompatActivity {
         formid = getIntent().getIntExtra("formid", 0);
         title = getIntent().getStringExtra("title");
         iRecNo = getIntent().getIntExtra("iRecNo", 0);
-        position = getIntent().getIntExtra("position", 0);
+        position = getIntent().getIntExtra("position", -1);
         dbType = iRecNo == 0 ? "add" : "modify";
     }
 
@@ -231,13 +232,13 @@ public class InputDetailActivity extends AppCompatActivity {
         });
     }
 
-
     private List<NetParams> getParams() {
         List<NetParams> params = new ArrayList<>();
         params.add(new NetParams("iFormID", formid + ""));
         params.add(new NetParams("userid", userid));
         params.add(new NetParams("database", companyCode));
         params.add(new NetParams("otype", Otypes.GetFormInfo));
+        params.add(new NetParams("key", iRecNo + ""));
         return params;
     }
 
@@ -250,7 +251,13 @@ public class InputDetailActivity extends AppCompatActivity {
                     JSONObject jsonObject = new JSONObject(string);
                     if (jsonObject.optBoolean("success")) {
                         initBarcodeColumnsData(jsonObject.optJSONObject("info").optString("formColumns"));
-                        iRecNo = iRecNo == 0 ? jsonObject.optInt("key", 0) : iRecNo;
+                        if (iRecNo == 0) {
+                            iRecNo = jsonObject.optInt("key", 0);
+                        } else {
+                            JSONObject data = jsonObject.optJSONObject("data");
+                            setMainData(data.optJSONArray("mainData").optJSONObject(0));
+                            setChildData(data.optJSONArray("childData"));
+                        }
                         LoadingFinish(null);
                         showView();
                     } else {
@@ -276,6 +283,40 @@ public class InputDetailActivity extends AppCompatActivity {
         });
     }
 
+    private void setMainData(JSONObject mainData) throws NullPointerException {
+        storageId = mainData.optInt("iBscDataStockMRecNo", 0);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                tvStorage.setText(mainData.optString("sStockName"));
+                etTray.setText(mainData.optString("sTrayCode"));
+            }
+        });
+
+    }
+
+    private void setChildData(JSONArray childData) throws NullPointerException, JSONException, Exception {
+        for (int i = 0; i < childData.length(); i++) {
+            codes.add(childData.getJSONObject(i).optString("sBarCode"));
+            if (i == 0) {
+                berchId = childData.getJSONObject(i).optInt("iBscDataStockDRecNo");
+                String berch = childData.getJSONObject(i).optString("sBerChID");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (berchId != 0) {
+                            tvBerch.setText(berch);
+                            etBerch.setVisibility(View.VISIBLE);
+                            ivBerch.setVisibility(View.VISIBLE);
+                            tvBerch.setVisibility(View.VISIBLE);
+                        }
+                    }
+                });
+            }
+        }
+        datas.addAll(initBarcodeData(childData));
+        refreshList();
+    }
 
     private void initBarcodeColumnsData(String data) {
         if (StringUtil.isNotEmpty(data)) {
@@ -404,6 +445,12 @@ public class InputDetailActivity extends AppCompatActivity {
             public void run() {
                 if (adapter == null) {
                     adapter = new PublicAdapter(datas, InputDetailActivity.this);
+                    adapter.setOnItemClickListener(new OnItemClickListener() {
+                        @Override
+                        public void onItemClick(View view, int position) {
+                            isRemove(position);
+                        }
+                    });
                     rvItem.setAdapter(adapter);
                 } else {
                     adapter.notifyDataSetChanged();
@@ -413,7 +460,25 @@ public class InputDetailActivity extends AppCompatActivity {
 
     }
 
-    @OnClick({R.id.iv_back, R.id.tv_storage, R.id.iv_storage, R.id.iv_berch, R.id.tv_empty, R.id.tv_delete, R.id.tv_submit, R.id.tv_save, R.id.tv_berch})
+    private void isRemove(int position) {
+        if (removeDialog == null) {
+            removeDialog = new JudgeDialog(this, R.style.JudgeDialog, "是否删除此条码？");
+        }
+        removeDialog.setOnCloseListener(new JudgeDialog.OnCloseListener() {
+            @Override
+            public void onClick(boolean confirm) {
+                if (confirm) {
+                    codes.remove(position);
+                    datas.remove(position);
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        });
+        removeDialog.show();
+    }
+
+
+    @OnClick({R.id.iv_back, R.id.tv_storage, R.id.iv_storage, R.id.iv_berch, R.id.tv_empty, R.id.tv_delete, R.id.tv_submit, R.id.tv_save, R.id.tv_berch, R.id.tv_clear})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.iv_back:
@@ -425,31 +490,79 @@ public class InputDetailActivity extends AppCompatActivity {
                 break;
             case R.id.tv_berch:
             case R.id.iv_berch:
-                pvBerch.show();
+                if (storages.size() == 0) {
+                    getStorageData();
+                } else {
+                    pvBerch.show();
+                }
                 break;
             case R.id.tv_empty:
                 getData();
                 break;
             case R.id.tv_delete:
                 isDelete();
-                delete();
                 break;
             case R.id.tv_save:
-                save();
+                save(false);
                 break;
             case R.id.tv_submit:
-                submit();
+                isSubmit();
+                break;
+            case R.id.tv_clear:
+                isClear();
                 break;
             default:
                 break;
         }
     }
 
-    private void isDelete() {
-        if (deleteDialog==null){
+    private void isClear() {
+        if (clearDialog == null) {
+            clearDialog = new JudgeDialog(this, R.style.JudgeDialog, "是否清空条码？", new JudgeDialog.OnCloseListener() {
+                @Override
+                public void onClick(boolean confirm) {
+                    if (confirm)
+                        clear();
+                }
+            });
+        }
+        clearDialog.show();
+    }
 
+    private void clear() {
+        if (adapter != null) {
+            datas.clear();
+            codes.clear();
+            adapter.notifyDataSetChanged();
         }
     }
+
+    private void isSubmit() {
+        if (submitDialog == null) {
+            submitDialog = new JudgeDialog(this, R.style.JudgeDialog, "是否提交？", new JudgeDialog.OnCloseListener() {
+                @Override
+                public void onClick(boolean confirm) {
+                    if (confirm)
+                        save(true);
+                }
+            });
+        }
+        submitDialog.show();
+    }
+
+    private void isDelete() {
+        if (deleteDialog == null) {
+            deleteDialog = new JudgeDialog(this, R.style.JudgeDialog, "是否删除？", new JudgeDialog.OnCloseListener() {
+                @Override
+                public void onClick(boolean confirm) {
+                    if (confirm)
+                        delete();
+                }
+            });
+        }
+        deleteDialog.show();
+    }
+
 
     private List<NetParams> submitParams() {
         List<NetParams> params = new ArrayList<>();
@@ -461,14 +574,28 @@ public class InputDetailActivity extends AppCompatActivity {
     }
 
     private void submit() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                LoadingFinish(null);
+                LoadingDialog.showDialogForLoading(InputDetailActivity.this);
+            }
+        });
         new NetUtil(submitParams(), url, new ResponseListener() {
             @Override
             public void onSuccess(String string) {
                 try {
                     JSONObject jsonObject = new JSONObject(string);
                     if (jsonObject.optBoolean("success")) {
-                        setResult(DeleteCode, new Intent().putExtra("position", position));
-                        finish();
+                        LoadingFinish(null);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                setResult(DeleteCode, new Intent().putExtra("position", position));
+                                finish();
+                            }
+                        });
+
                     } else {
                         LoadingFinish(jsonObject.optString("message"));
                     }
@@ -497,7 +624,6 @@ public class InputDetailActivity extends AppCompatActivity {
         params.add(new NetParams("otype", Otypes.MMStockProductInMSave));
         params.add(new NetParams("userid", userid));
         params.add(new NetParams("database", companyCode));
-        params.add(new NetParams("iRecNo", iRecNo + ""));
         params.add(new NetParams("iBscDataStockMRecNo", storageId + ""));
         params.add(new NetParams("iBscDataStockDRecNo", berchId + ""));
         params.add(new NetParams("iMMStockProductInMRecNo", iRecNo + ""));
@@ -519,15 +645,35 @@ public class InputDetailActivity extends AppCompatActivity {
         return codes;
     }
 
-    private void save() {
+    private void save(boolean submit) {
+        if (storageId == 0) {
+            Toast("请选择仓库");
+            return;
+        }
+        if (codes.size() == 0) {
+            Toast("条码不能为空");
+            return;
+        }
+        LoadingDialog.showDialogForLoading(this);
         new NetUtil(saveParams(), url, new ResponseListener() {
             @Override
             public void onSuccess(String string) {
                 try {
                     JSONObject jsonObject = new JSONObject(string);
+                    LoadingFinish(null);
                     if (jsonObject.optBoolean("success")) {
-                        setResult(RefreshCode);
-                        finish();
+                        if (submit) {
+                            submit();
+                        } else {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    setResult(RefreshCode);
+                                    finish();
+                                }
+                            });
+
+                        }
                     } else {
                         LoadingFinish(jsonObject.optString("message"));
                     }
@@ -561,14 +707,21 @@ public class InputDetailActivity extends AppCompatActivity {
     }
 
     private void delete() {
+        LoadingDialog.showDialogForLoading(this);
         new NetUtil(deteleParams(), url, new ResponseListener() {
             @Override
             public void onSuccess(String string) {
                 try {
                     JSONObject jsonObject = new JSONObject(string);
                     if (jsonObject.optBoolean("success")) {
-                        setResult(DeleteCode, new Intent().putExtra("position", position));
-                        finish();
+                        LoadingFinish(null);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                setResult(DeleteCode, new Intent().putExtra("position", position));
+                                finish();
+                            }
+                        });
                     } else {
                         LoadingFinish(jsonObject.optString("message"));
                     }
@@ -670,14 +823,24 @@ public class InputDetailActivity extends AppCompatActivity {
                             .build();
                     pvStorage.setPicker(storages);//一级选择器
                     setDialog(pvStorage);
-                    pvStorage.show();
+                    if (storageId != 0) {
+                        for (int i = 0; i < storages.size(); i++) {
+                            if (storages.get(i).getIBscDataStockMRecNo() == storageId) {
+                                setBerch(storages.get(i).getBerChes());
+                                pvBerch.show();
+                            }
+                        }
+                    } else {
+                        pvStorage.show();
+                    }
                 }
             });
         }
     }
 
     private void setBerch(List<Storage.BerCh> berChes) {
-        clearBerch();
+        if (pvBerch != null)
+            clearBerch();
         if (berChes.size() > 0) {
             this.berChes.addAll(berChes);
             initBerchPick();

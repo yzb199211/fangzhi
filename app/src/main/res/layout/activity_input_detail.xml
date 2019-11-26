@@ -111,6 +111,7 @@
             android:background="@color/white"
             android:gravity="center_vertical"
             android:hint="@string/hint_tray"
+            android:inputType="textEmailAddress"
             android:nextFocusDown="@id/et_code"
             android:paddingLeft="@dimen/dp_10"
             android:paddingRight="@dimen/dp_10"
@@ -120,20 +121,41 @@
             android:visibility="gone" />
     </LinearLayout>
 
-    <com.yyy.fangzhi.view.EditListenerView
-        android:id="@+id/et_code"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_40"
         android:layout_marginTop="@dimen/dp_1"
-        android:background="@color/white"
-        android:gravity="center_vertical"
-        android:hint="@string/hint_code"
-        android:paddingLeft="@dimen/dp_10"
-        android:paddingRight="@dimen/dp_10"
-        android:singleLine="true"
-        android:textColor="@color/default_content_color"
-        android:textSize="@dimen/sp_14"
-        android:visibility="gone" />
+        android:orientation="horizontal">
+
+        <com.yyy.fangzhi.view.EditListenerView
+            android:id="@+id/et_code"
+            android:layout_width="@dimen/dp_0"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:hint="@string/hint_code"
+            android:inputType="number"
+            android:paddingLeft="@dimen/dp_10"
+            android:paddingRight="@dimen/dp_10"
+            android:singleLine="true"
+            android:textColor="@color/default_content_color"
+            android:textSize="@dimen/sp_14"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tv_clear"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/dp_1"
+            android:background="@color/white"
+            android:gravity="center"
+            android:paddingLeft="@dimen/dp_10"
+            android:paddingRight="@dimen/dp_10"
+            android:text="清空"
+            android:textColor="@color/red"
+            android:textSize="@dimen/sp_14" />
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_item"
