@@ -18,6 +18,9 @@ public class IntentUtil {
             case 200001:
                 intent.setClass(context, InputDetailActivity.class);
                 return intent;
+            case 24:
+                
+                return intent;
         }
         return null;
     }

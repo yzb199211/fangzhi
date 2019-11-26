@@ -238,11 +238,13 @@ public class PublicListActivity extends AppCompatActivity {
             @Override
             public void onItemClick(View view, int position) {
                 Intent intent = IntentUtil.getIntent(PublicListActivity.this, formid);
-                intent.putExtra("title", title);
-                intent.putExtra("formid", formid);
-                intent.putExtra("iRecNo", datas.get(position).getId());
-                intent.putExtra("position", position);
-                startActivityForResult(intent, 0);
+                if (intent != null) {
+                    intent.putExtra("title", title);
+                    intent.putExtra("formid", formid);
+                    intent.putExtra("iRecNo", datas.get(position).getId());
+                    intent.putExtra("position", position);
+                    startActivityForResult(intent, 0);
+                }
             }
         });
         rvBill.setAdapter(adapter);

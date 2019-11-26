@@ -36,8 +36,8 @@
     <string name="title_main">中达货架</string>
 
     <string name="title_review_list">审核列表</string>
-
     <string name="title_review_detail">审核详情</string>
+    <string name="title_notice">发货通知单</string>
 
     <string name="title_menu">常用功能</string>
 
@@ -64,6 +64,7 @@
     <string name="hint_storage"> 请输入仓库</string>
     <string name="hint_tray"> 请输入托盘号</string>
     <string name="hint_code"> 请输入条码</string>
+    <string name="hint_notice"> 请输入通知单号</string>
 
     <string name="error_berch">无此仓位</string>
 

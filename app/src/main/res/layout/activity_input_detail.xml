@@ -63,7 +63,7 @@
             android:layout_weight="1"
             android:background="@color/white"
             android:gravity="center_vertical|left"
-            android:hint="@string/hint_storage"
+            android:hint="@string/hint_berch"
             android:paddingLeft="@dimen/dp_10"
             android:singleLine="true"
             android:textColor="@color/default_content_color"
@@ -154,7 +154,8 @@
             android:paddingRight="@dimen/dp_10"
             android:text="清空"
             android:textColor="@color/red"
-            android:textSize="@dimen/sp_14" />
+            android:textSize="@dimen/sp_14"
+            android:visibility="gone" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

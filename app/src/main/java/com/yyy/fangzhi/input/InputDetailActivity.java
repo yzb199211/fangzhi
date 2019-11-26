@@ -92,6 +92,8 @@ public class InputDetailActivity extends AppCompatActivity {
     LinearLayout bottomLayout;
     @BindView(R.id.tv_delete)
     TextView tvDelete;
+    @BindView(R.id.tv_clear)
+    TextView tvClear;
 
     String userid;
     String url;
@@ -335,6 +337,7 @@ public class InputDetailActivity extends AppCompatActivity {
                 etTray.setVisibility(View.VISIBLE);
                 rvItem.setVisibility(View.VISIBLE);
                 bottomLayout.setVisibility(View.VISIBLE);
+                tvClear.setVisibility(View.VISIBLE);
             }
         });
     }
