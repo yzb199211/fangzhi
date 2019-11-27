@@ -14,7 +14,6 @@
         android:id="@+id/tv_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/dp_80"
         android:gravity="center_vertical|left"
         android:singleLine="true"
         android:textColor="@color/btn_blue_press"

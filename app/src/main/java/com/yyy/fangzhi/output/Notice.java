@@ -81,7 +81,7 @@ public class Notice {
     }
 
     public String getDDate() {
-        return dDate;
+        return dDate.replace("T", " ");
     }
 
     public void setDDate(String dDate) {

@@ -5,6 +5,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
@@ -15,7 +16,7 @@ import com.yyy.fangzhi.R;
 import com.yyy.fangzhi.interfaces.OnItemClickListener;
 
 
-public class TextItem extends FrameLayout {
+public class TextItem extends LinearLayout {
     Context context;
     TextView tvContent;
     TextView tvTitle;
@@ -58,6 +59,7 @@ public class TextItem extends FrameLayout {
         this.context = context;
         LayoutInflater.from(context).inflate(R.layout.item_text, this, true);
         setBackgroundColor(context.getResources().getColor(R.color.white));
+        setOrientation(HORIZONTAL);
         init();
     }
 

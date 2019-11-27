@@ -40,6 +40,15 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.VH> {
         holder.tiNo.setTitle("通知单号：").setContent(list.get(position).getSBillNo());
         holder.tiFinish.setContent(list.get(position).getIFinish() == 0 ? "" : "完成").setContentColor(context.getResources().getColor(R.color.red));
         holder.tiOrder.setTitle("订单号：").setContent(list.get(position).getSContractNos());
+        holder.tiRed.setContent(list.get(position).getIRed() == 0 ? "" : "红冲").setContentColor(context.getResources().getColor(R.color.red));
+        holder.tiCus.setTitle("客户：").setContent(list.get(position).getSCustShortName());
+        holder.tiCut.setContent(list.get(position).getICut() == 0 ? "" : "零件").setContentColor(context.getResources().getColor(R.color.red));
+        holder.tiName.setTitle("产品：").setContent(list.get(position).getSName());
+        holder.tiColor.setTitle("色号：").setContent(list.get(position).getSColorID());
+        holder.tiNeed.setTitle("需求米数：").setContent(list.get(position).getFQty() + "");
+        holder.tiDo.setTitle("已发米数：").setContent(list.get(position).getFOutQty() + "");
+        holder.tiUndo.setTitle("未发米数：").setContent(list.get(position).getFNoOutQty() + "");
+        holder.tiDate.setTitle("下发日期：").setContent(list.get(position).getDDate());
     }
 
     @Override

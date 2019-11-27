@@ -9,5 +9,5 @@ public class Otypes {
     public static final String MMStockProductInMDelete = "MMStockProductInMDelete";
     public static final String MMStockProductInMSave = "MMStockProductInMSave";
     public static final String MMStockProductInMSubmit = "MMStockProductInMSubmit";
-    public static final String GetPDASDSendM  = "GetPDASDSendM ";
+    public static final String GetPDASDSendM = "GetPDASDSendM";
 }

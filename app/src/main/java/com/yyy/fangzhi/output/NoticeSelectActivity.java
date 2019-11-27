@@ -1,7 +1,9 @@
 package com.yyy.fangzhi.output;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +25,7 @@ import com.google.gson.reflect.TypeToken;
 import com.yyy.fangzhi.R;
 import com.yyy.fangzhi.dialog.LoadingDialog;
 import com.yyy.fangzhi.input.InputDetailActivity;
+import com.yyy.fangzhi.interfaces.OnItemClickListener;
 import com.yyy.fangzhi.interfaces.ResponseListener;
 import com.yyy.fangzhi.model.Storage;
 import com.yyy.fangzhi.util.SharedPreferencesHelper;
@@ -59,10 +62,6 @@ public class NoticeSelectActivity extends AppCompatActivity {
     TextView tvTitle;
     @BindView(R.id.iv_right)
     ImageView ivRight;
-    @BindView(R.id.tv_empty)
-    TextView tvEmpty;
-    @BindView(R.id.fl_empty)
-    FrameLayout flEmpty;
     @BindView(R.id.tv_storage)
     TextView tvStorage;
     @BindView(R.id.ll_storage)
@@ -225,9 +224,11 @@ public class NoticeSelectActivity extends AppCompatActivity {
             @Override
             public void onSuccess(String string) {
                 try {
+                    Log.e("data", string + "1");
                     JSONObject jsonObject = new JSONObject(string);
                     if (jsonObject.optBoolean("success")) {
                         notices.addAll(initNotice(jsonObject.optJSONArray("tables").optString(0)));
+                        RefreshList();
                     } else {
                         LoadingFinish(jsonObject.optString("message"));
                     }
@@ -395,11 +396,23 @@ public class NoticeSelectActivity extends AppCompatActivity {
     }
 
     private void RefreshList() {
-        if (adapter == null) {
-            adapter = new NoticeAdapter(this, notices);
-            rvItem.setAdapter(adapter);
-        } else {
-            adapter.notifyDataSetChanged();
-        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (adapter == null) {
+                    adapter = new NoticeAdapter(NoticeSelectActivity.this, notices);
+                    adapter.setOnItemClickListener(new OnItemClickListener() {
+                        @Override
+                        public void onItemClick(View view, int position) {
+
+                        }
+                    });
+                    rvItem.setAdapter(adapter);
+                } else {
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        });
+
     }
 }
