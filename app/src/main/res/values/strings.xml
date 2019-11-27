@@ -42,6 +42,7 @@
     <string name="title_menu">常用功能</string>
 
     <string name="btn_cancel">注销</string>
+    <string name="btn_search">搜索</string>
     <string name="btn_more">更多</string>
     <string name="btn_yes">是</string>
     <string name="btn_no">否</string>
@@ -70,5 +71,6 @@
 
     <string name="repeat_code">条码重复</string>
     <string name="empty_code">条码不存在</string>
+    <string name="empty_storage">仓库不能为空</string>
 </resources>
 
