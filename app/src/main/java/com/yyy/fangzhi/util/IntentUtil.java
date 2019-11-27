@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.yyy.fangzhi.input.InputDetailActivity;
 import com.yyy.fangzhi.output.NoticeSelectActivity;
+import com.yyy.fangzhi.output.OutputDetailActivity;
 
 public class IntentUtil {
     public static void goActivity(AppCompatActivity activity, int formId) {
@@ -20,7 +21,7 @@ public class IntentUtil {
                 intent.setClass(context, InputDetailActivity.class);
                 return intent;
             case 24:
-                intent.setClass(context, NoticeSelectActivity.class);
+                intent.setClass(context, OutputDetailActivity.class);
                 return intent;
         }
         return null;

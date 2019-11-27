@@ -20,11 +20,7 @@ public class TextItem extends LinearLayout {
     Context context;
     TextView tvContent;
     TextView tvTitle;
-    OnItemClickListener onSelectClickListener;
 
-    public void setOnSelectClickListener(OnItemClickListener onSelectClickListener) {
-        this.onSelectClickListener = onSelectClickListener;
-    }
 
     public TextItem setTitle(String title) {
         tvTitle.setText(title);
@@ -66,14 +62,6 @@ public class TextItem extends LinearLayout {
     private void init() {
         tvTitle = findViewById(R.id.tv_title);
         tvContent = findViewById(R.id.tv_content);
-        tvContent.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (onSelectClickListener != null) {
-                    onSelectClickListener.onItemClick(v, 0);
-                }
-            }
-        });
     }
 
     public String getText() {

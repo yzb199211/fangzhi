@@ -1,10 +1,12 @@
 package com.yyy.fangzhi.output;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -16,7 +18,9 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,7 +28,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.yyy.fangzhi.R;
 import com.yyy.fangzhi.dialog.LoadingDialog;
-import com.yyy.fangzhi.input.InputDetailActivity;
+import com.yyy.fangzhi.interfaces.OnFragmentAddListener;
 import com.yyy.fangzhi.interfaces.OnItemClickListener;
 import com.yyy.fangzhi.interfaces.ResponseListener;
 import com.yyy.fangzhi.model.Storage;
@@ -52,16 +56,10 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.Unbinder;
 
-public class NoticeSelectActivity extends AppCompatActivity {
+public class NoticeSelectFragment extends Fragment {
 
-
-    @BindView(R.id.iv_back)
-    ImageView ivBack;
-    @BindView(R.id.tv_title)
-    TextView tvTitle;
-    @BindView(R.id.iv_right)
-    ImageView ivRight;
     @BindView(R.id.tv_storage)
     TextView tvStorage;
     @BindView(R.id.ll_storage)
@@ -101,15 +99,47 @@ public class NoticeSelectActivity extends AppCompatActivity {
 
     private SharedPreferencesHelper preferencesHelper;
     private OptionsPickerView pvStorage;
+    Unbinder unbinder;
+    OnFragmentAddListener onFragmentAddListener;
 
+    public interface OnFragmentAddListener {
+        void onFragmentAdd(String pos);
+    }
+
+    public void setOnFragmentAddListener(OnFragmentAddListener onFragmentAddListener) {
+        this.onFragmentAddListener = onFragmentAddListener;
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_notice_select);
-        ButterKnife.bind(this);
-        preferencesHelper = new SharedPreferencesHelper(this, getString(R.string.preferenceCache));
+        preferencesHelper = new SharedPreferencesHelper(getActivity(), getString(R.string.preferenceCache));
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.activity_notice_select, container, false);
+        unbinder = ButterKnife.bind(this, view);
         init();
+        return view;
+    }
+
+    public void onButtonPressed(String uri) {
+        if (onFragmentAddListener != null) {
+            onFragmentAddListener.onFragmentAdd(uri);
+        }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnFragmentAddListener) {
+            onFragmentAddListener = (OnFragmentAddListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
     }
 
     private void init() {
@@ -135,18 +165,17 @@ public class NoticeSelectActivity extends AppCompatActivity {
     }
 
     private void getIntentData() {
-        formid = getIntent().getIntExtra("formid", 0);
-        title = getIntent().getStringExtra("title");
+        formid = getActivity().getIntent().getIntExtra("formid", 0);
+        title = getActivity().getIntent().getStringExtra("title");
     }
 
     private void initView() {
-        tvTitle.setText(getString(R.string.title_notice));
         initRecycle();
     }
 
     private void initRecycle() {
-        rvItem.setLayoutManager(new LinearLayoutManager(this));
-        rvItem.addItemDecoration(new RecyclerViewDivider(this, LinearLayout.VERTICAL));
+        rvItem.setLayoutManager(new LinearLayoutManager(getActivity()));
+        rvItem.addItemDecoration(new RecyclerViewDivider(getActivity(), LinearLayout.VERTICAL));
     }
 
     private void initListener() {
@@ -182,12 +211,9 @@ public class NoticeSelectActivity extends AppCompatActivity {
         });
     }
 
-    @OnClick({R.id.iv_back, R.id.tv_storage, R.id.iv_storage, R.id.tv_search})
+    @OnClick({R.id.tv_storage, R.id.iv_storage, R.id.tv_search})
     public void onViewClicked(View view) {
         switch (view.getId()) {
-            case R.id.iv_back:
-                finish();
-                break;
             case R.id.tv_storage:
             case R.id.iv_storage:
                 selectStorage();
@@ -224,7 +250,6 @@ public class NoticeSelectActivity extends AppCompatActivity {
             @Override
             public void onSuccess(String string) {
                 try {
-                    Log.e("data", string + "1");
                     JSONObject jsonObject = new JSONObject(string);
                     if (jsonObject.optBoolean("success")) {
                         notices.addAll(initNotice(jsonObject.optJSONArray("tables").optString(0)));
@@ -278,7 +303,7 @@ public class NoticeSelectActivity extends AppCompatActivity {
     }
 
     private void getStorageData() {
-        LoadingDialog.showDialogForLoading(this);
+        LoadingDialog.showDialogForLoading(getActivity());
         new NetUtil(getStorageParams(), url, new ResponseListener() {
             @Override
             public void onSuccess(String string) {
@@ -314,10 +339,10 @@ public class NoticeSelectActivity extends AppCompatActivity {
 
     private void initStoragePick() {
         if (storages.size() > 0) {
-            runOnUiThread(new Runnable() {
+            getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    pvStorage = new OptionsPickerBuilder(NoticeSelectActivity.this, new OnOptionsSelectListener() {
+                    pvStorage = new OptionsPickerBuilder(getActivity(), new OnOptionsSelectListener() {
                         @Override
                         public void onOptionsSelect(int options1, int options2, int options3, View v) {
                             if (storageId != storages.get(options1).getIBscDataStockMRecNo()) {
@@ -380,7 +405,7 @@ public class NoticeSelectActivity extends AppCompatActivity {
     }
 
     private void LoadingFinish(String msg) {
-        runOnUiThread(new Runnable() {
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (StringUtil.isNotEmpty(msg)) {
@@ -392,23 +417,20 @@ public class NoticeSelectActivity extends AppCompatActivity {
     }
 
     private void Toast(String msg) {
-        Toasts.showShort(this, msg);
+        Toasts.showShort(getActivity(), msg);
     }
 
     private void RefreshList() {
-        runOnUiThread(new Runnable() {
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (adapter == null) {
-                    adapter = new NoticeAdapter(NoticeSelectActivity.this, notices);
+                    adapter = new NoticeAdapter(getActivity(), notices);
                     adapter.setOnItemClickListener(new OnItemClickListener() {
                         @Override
                         public void onItemClick(View view, int position) {
-                            Intent intent = new Intent();
-                            intent.setClass(NoticeSelectActivity.this, OutputDetailActivity.class);
-                            intent.putExtra("title", title);
-                            intent.putExtra("formid", formid);
-                            startActivity(intent);
+                            onButtonPressed(position + "");
+
                         }
                     });
                     rvItem.setAdapter(adapter);
@@ -417,7 +439,17 @@ public class NoticeSelectActivity extends AppCompatActivity {
                 }
             }
         });
-
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        onFragmentAddListener = null;
+    }
 }

@@ -1,6 +1,7 @@
 package com.yyy.fangzhi.output;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,6 +50,14 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.VH> {
         holder.tiDo.setTitle("已发米数：").setContent(list.get(position).getFOutQty() + "");
         holder.tiUndo.setTitle("未发米数：").setContent(list.get(position).getFNoOutQty() + "");
         holder.tiDate.setTitle("下发日期：").setContent(list.get(position).getDDate());
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.e("click","clock");
+                if (onItemClickListener != null)
+                    onItemClickListener.onItemClick(v, position);
+            }
+        });
     }
 
     @Override
