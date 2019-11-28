@@ -1,4 +1,4 @@
-package com.yyy.fangzhi.input;
+package com.yyy.fangzhi.model;
 
 public class BarcodeColumn {
 

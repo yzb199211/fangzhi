@@ -83,7 +83,7 @@ public class NoticeSelectFragment extends Fragment {
     private String url;
     private String address;
     private String companyCode;
-    private String title;
+
 
     private int storageId = 0;
     private int formid = 0;
@@ -166,7 +166,7 @@ public class NoticeSelectFragment extends Fragment {
 
     private void getIntentData() {
         formid = getActivity().getIntent().getIntExtra("formid", 0);
-        title = getActivity().getIntent().getStringExtra("title");
+
     }
 
     private void initView() {
@@ -429,8 +429,7 @@ public class NoticeSelectFragment extends Fragment {
                     adapter.setOnItemClickListener(new OnItemClickListener() {
                         @Override
                         public void onItemClick(View view, int position) {
-                            onButtonPressed(position + "");
-
+                            onButtonPressed(new Gson().toJson(notices.get(position)));
                         }
                     });
                     rvItem.setAdapter(adapter);

@@ -34,7 +34,7 @@ public class Notice {
     private int fQty;
     private double fOutQty;
     private int fNoOutQty;
-    private double iFinish;
+    private int iFinish;
     private String sFinish;
     private int iBillType;
     private String sName;
@@ -136,11 +136,11 @@ public class Notice {
         this.fNoOutQty = fNoOutQty;
     }
 
-    public double getIFinish() {
+    public int getIFinish() {
         return iFinish;
     }
 
-    public void setIFinish(double iFinish) {
+    public void setIFinish(int iFinish) {
         this.iFinish = iFinish;
     }
 
