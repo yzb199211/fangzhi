@@ -70,7 +70,7 @@
     <string name="error_berch">无此仓位</string>
 
     <string name="repeat_code">条码重复</string>
-    <string name="empty_code">条码不存在</string>
+    <string name="empty_code">无条码</string>
     <string name="empty_storage">仓库不能为空</string>
 </resources>
 

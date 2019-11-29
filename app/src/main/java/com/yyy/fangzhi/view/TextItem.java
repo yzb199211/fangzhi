@@ -2,6 +2,7 @@ package com.yyy.fangzhi.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -55,6 +56,7 @@ public class TextItem extends LinearLayout {
         this.context = context;
         LayoutInflater.from(context).inflate(R.layout.item_text, this, true);
         setBackgroundColor(context.getResources().getColor(R.color.white));
+        setGravity(Gravity.CENTER_VERTICAL);
         setOrientation(HORIZONTAL);
         init();
     }

@@ -10,4 +10,8 @@ public class Otypes {
     public static final String MMStockProductInMSave = "MMStockProductInMSave";
     public static final String MMStockProductInMSubmit = "MMStockProductInMSubmit";
     public static final String GetPDASDSendM = "GetPDASDSendM";
+    public static final String GetPDAMMStockProductOutBarCode = "GetPDAMMStockProductOutBarCode";
+    public static final String MMStockProductOutMDelete = "MMStockProductOutMDelete";
+    public static final String MMStockProductOutMSave = "MMStockProductOutMSave";
+    public static final String MMStockProductOutMSubmit = "MMStockProductOutMSubmit";
 }

@@ -13,7 +13,9 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
@@ -22,12 +24,14 @@ import com.yyy.fangzhi.R;
 import com.yyy.fangzhi.dialog.JudgeDialog;
 import com.yyy.fangzhi.dialog.LoadingDialog;
 import com.yyy.fangzhi.input.InputDetailActivity;
+import com.yyy.fangzhi.interfaces.OnEntryListener;
 import com.yyy.fangzhi.interfaces.OnItemClickListener;
 import com.yyy.fangzhi.interfaces.ResponseListener;
 import com.yyy.fangzhi.model.BarcodeColumn;
 import com.yyy.fangzhi.pubilc.DataFormat;
 import com.yyy.fangzhi.pubilc.PublicAdapter;
 import com.yyy.fangzhi.pubilc.PublicItem;
+import com.yyy.fangzhi.util.KeyBoardUtil;
 import com.yyy.fangzhi.util.SharedPreferencesHelper;
 import com.yyy.fangzhi.util.StringUtil;
 import com.yyy.fangzhi.util.Toasts;
@@ -38,6 +42,7 @@ import com.yyy.fangzhi.util.net.Otypes;
 import com.yyy.fangzhi.view.Configure.ConfigureInfo;
 import com.yyy.fangzhi.view.EditListenerView;
 import com.yyy.fangzhi.view.TextItem;
+import com.yyy.fangzhi.view.recycle.RecyclerViewDivider;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -51,6 +56,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
+
+import static com.yyy.fangzhi.util.ResultCode.DeleteCode;
+import static com.yyy.fangzhi.util.ResultCode.RefreshCode;
 
 public class OutputDetailFragment extends Fragment {
     private static final String ARG_PARAM1 = "data";
@@ -93,6 +101,13 @@ public class OutputDetailFragment extends Fragment {
     LinearLayout bottomLayout;
     @BindView(R.id.fl_empty)
     FrameLayout flEmpty;
+    @BindView(R.id.ll_five)
+    LinearLayout llFive;
+    @BindView(R.id.ll_six)
+    LinearLayout llSix;
+    @BindView(R.id.scroll)
+    NestedScrollView scrollView;
+
 
     private OnResultListener mListener;
     Unbinder unbinder;
@@ -101,9 +116,12 @@ public class OutputDetailFragment extends Fragment {
     private String url;
     private String address;
     private String companyCode;
-    private String CustomerName;
+    private String customerName;
+    private String noticeName;
+    private String storageName;
+    private String date;
+    private String dbType;
 
-    private int storageId = 0;
     private int formid = 0;
 
     private int iRed = 0;
@@ -111,7 +129,8 @@ public class OutputDetailFragment extends Fragment {
     private int iFinish = 0;
     private int iRecNo;
     private int customerId = 0;
-
+    private int noticeId = 0;
+    private int storageId = 0;
 
     private List<BarcodeColumn> barcodeColumns;
     private List<PublicItem> datas;
@@ -124,7 +143,7 @@ public class OutputDetailFragment extends Fragment {
 
     private PublicAdapter adapter;
 
-    SharedPreferencesHelper preferencesHelper;
+    private SharedPreferencesHelper preferencesHelper;
 
     private String fisrtData;
 
@@ -142,7 +161,6 @@ public class OutputDetailFragment extends Fragment {
         preferencesHelper = new SharedPreferencesHelper(getActivity(), getString(R.string.preferenceCache));
         if (getArguments() != null) {
             fisrtData = getArguments().getString(ARG_PARAM1);
-            Log.e("data", fisrtData);
             if (StringUtil.isNotEmpty(fisrtData)) {
                 Notice notice = new Gson().fromJson(fisrtData, Notice.class);
                 getNotice(notice);
@@ -152,9 +170,15 @@ public class OutputDetailFragment extends Fragment {
 
     private void getNotice(Notice notice) {
         iCut = notice.getICut();
-        iRecNo = notice.getIRed();
+        iRed = notice.getIRed();
         iFinish = notice.getIFinish();
-
+        customerId = notice.getIBscDataCustomerRecNo();
+        customerName = notice.getSCustShortName();
+        noticeName = notice.getSBillNo();
+        noticeId = notice.getIRecNo();
+        storageId = notice.getStorage().getIBscDataStockMRecNo();
+        storageName = notice.getStorage().getSStockName();
+        date = notice.getDDate();
     }
 
     @Override
@@ -191,13 +215,108 @@ public class OutputDetailFragment extends Fragment {
     private void getIntentData() {
         formid = getActivity().getIntent().getIntExtra("formid", 0);
         iRecNo = getActivity().getIntent().getIntExtra("iRecNo", 0);
-
+        dbType = iRecNo == 0 ? "add" : "modify";
     }
 
     private void initView() {
         bottomLayout.setVisibility(View.GONE);
+        svRed.setChecked(iRed == 0 ? false : true);
+        itStorage.setContent(storageName).setContentColor(getActivity().getResources().getColor(R.color.default_content_color)).setTitle("仓库：");
+        itNotice.setContent(noticeName).setContentColor(getActivity().getResources().getColor(R.color.default_content_color)).setTitle("通知单：");
+        itDate.setContent(date).setContentColor(getActivity().getResources().getColor(R.color.default_content_color)).setTitle("日期：");
+        itCus.setContent(customerName).setContentColor(getActivity().getResources().getColor(R.color.default_content_color)).setTitle("客户：");
+        itWorker.setContent(userid).setContentColor(getActivity().getResources().getColor(R.color.default_content_color)).setTitle("下单：");
         if (iRecNo == 0)
             tvDelete.setVisibility(View.INVISIBLE);
+        initRecycle();
+        setCodeListener();
+    }
+
+    private void initRecycle() {
+        rvItem.setLayoutManager(new LinearLayoutManager(getActivity()));
+        rvItem.addItemDecoration(new RecyclerViewDivider(getActivity(), LinearLayout.VERTICAL));
+    }
+
+    private void setCodeListener() {
+        etCode.setOnEntryListener(new OnEntryListener() {
+            @Override
+            public void onEntry(View view) {
+                KeyBoardUtil.hideInput(getActivity());
+                String code = etCode.getText().toString();
+                etCode.setText("");
+                if (codes.contains(code)) {
+                    Toast(getString(R.string.repeat_code));
+                    return;
+                }
+                if (StringUtil.isNotEmpty(code)) {
+                    getCodeData(code);
+                }
+            }
+        });
+    }
+
+    private List<NetParams> getCodeParams(String s) {
+        List<NetParams> params = new ArrayList<>();
+        params.add(new NetParams("otype", Otypes.GetPDAMMStockProductOutBarCode));
+        params.add(new NetParams("userid", userid));
+        params.add(new NetParams("database", companyCode));
+        params.add(new NetParams("sBarCode", s));
+        params.add(new NetParams("iBscDataStockMRecNo", storageId + ""));
+        params.add(new NetParams("iSDSendMRecNo", noticeId + ""));
+        params.add(new NetParams("iBscDataCustomerRecNo", customerId + ""));
+        params.add(new NetParams("iBscDataMatRecNo", 0 + ""));
+        params.add(new NetParams("iRed", 0 + ""));
+        params.add(new NetParams("fCutQty", 0 + ""));
+        return params;
+    }
+
+    private void getCodeData(String code) {
+        new NetUtil(getCodeParams(code), url, new ResponseListener() {
+            @Override
+            public void onSuccess(String string) {
+                try {
+                    JSONObject jsonObject = new JSONObject(string);
+                    if (jsonObject.optBoolean("success")) {
+                        List<PublicItem> list = initBarcodeData(removeRepeat(jsonObject.optJSONArray("data")));
+                        if (list != null && list.size() > 0) {
+                            datas.addAll(0, list);
+                            refreshList();
+                        } else {
+                            LoadingFinish(getString(R.string.empty_code));
+                        }
+                    } else {
+                        LoadingFinish(jsonObject.optString("message"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_json));
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.empty_data));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_data));
+                }
+
+            }
+
+            @Override
+            public void onFail(IOException e) {
+                e.printStackTrace();
+                LoadingFinish(e.getMessage());
+            }
+        });
+    }
+
+    private JSONArray removeRepeat(JSONArray data) throws NullPointerException, JSONException, Exception {
+        JSONArray array = new JSONArray();
+        for (int i = 0; i < data.length(); i++) {
+            if (!codes.contains(data.optJSONObject(i).optString("sBarCode"))) {
+                array.put(data.optJSONObject(i));
+                codes.add(data.optJSONObject(i).optString("sBarCode"));
+            }
+        }
+        return array;
     }
 
     private List<NetParams> getParams() {
@@ -298,6 +417,8 @@ public class OutputDetailFragment extends Fragment {
     private PublicItem getBarcodeItem(JSONObject jsonObject) throws
             JSONException, NullPointerException, Exception {
         PublicItem item = new PublicItem();
+        item.setCode(jsonObject.optString("sBarCode"));
+        item.setOutCode(getOutCode(jsonObject));
         List<ConfigureInfo> list = new ArrayList<>();
         for (BarcodeColumn column : barcodeColumns) {
             if (column.getIHide() == 0) {
@@ -321,6 +442,16 @@ public class OutputDetailFragment extends Fragment {
         item.setList(list);
         item.setId(jsonObject.optInt("iRecNo", 0));
         return item;
+    }
+
+    private PublicItem.OutCode getOutCode(JSONObject jsonObject) throws NullPointerException, Exception {
+        PublicItem.OutCode code = new PublicItem.OutCode();
+        code.setCode(jsonObject.optString("sBarCode"));
+        code.setTray(jsonObject.optString("sTrayCode"));
+        code.setNotice(jsonObject.optInt("iSDSendDRecNo", 0) + "");
+        code.setFlawQty(jsonObject.optDouble("fFlawQty"));
+        code.setOutQty(jsonObject.optDouble("fQty"));
+        return code;
     }
 
     private int getInfoContentSize(String sValueFontSize) {
@@ -419,14 +550,217 @@ public class OutputDetailFragment extends Fragment {
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.tv_delete:
+                isDelete();
                 break;
             case R.id.tv_save:
+                save(false);
                 break;
             case R.id.tv_submit:
+                isSubmit();
                 break;
             default:
                 break;
         }
+    }
+
+    private void isDelete() {
+        if (deleteDialog == null) {
+            deleteDialog = new JudgeDialog(getActivity(), R.style.JudgeDialog, "是否删除？", new JudgeDialog.OnCloseListener() {
+                @Override
+                public void onClick(boolean confirm) {
+                    if (confirm)
+                        delete();
+                }
+            });
+        }
+        deleteDialog.show();
+    }
+
+    private List<NetParams> deteleParams() {
+        List<NetParams> params = new ArrayList<>();
+        params.add(new NetParams("otype", Otypes.MMStockProductOutMDelete));
+        params.add(new NetParams("userid", userid));
+        params.add(new NetParams("database", companyCode));
+        params.add(new NetParams("iRecNo", iRecNo + ""));
+        return params;
+    }
+
+    private void delete() {
+        LoadingDialog.showDialogForLoading(getActivity());
+        new NetUtil(deteleParams(), url, new ResponseListener() {
+            @Override
+            public void onSuccess(String string) {
+                try {
+                    JSONObject jsonObject = new JSONObject(string);
+                    if (jsonObject.optBoolean("success")) {
+                        LoadingFinish(null);
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+//                                setResult(DeleteCode, new Intent().putExtra("position", position));
+//                                finish();
+                            }
+                        });
+                    } else {
+                        LoadingFinish(jsonObject.optString("message"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_json));
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.empty_data));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_data));
+                }
+            }
+
+            @Override
+            public void onFail(IOException e) {
+                e.printStackTrace();
+                LoadingFinish(e.getMessage());
+            }
+        });
+    }
+
+    private List<NetParams> saveParams() {
+        List<NetParams> params = new ArrayList<>();
+        params.add(new NetParams("otype", Otypes.MMStockProductOutMSave));
+        params.add(new NetParams("userid", userid));
+        params.add(new NetParams("database", companyCode));
+        params.add(new NetParams("iBscDataStockMRecNo", storageId + ""));
+        params.add(new NetParams("iRed", iRed + ""));
+        params.add(new NetParams("iMMStockProductOutMRecNo", iRecNo + ""));
+        params.add(new NetParams("iSDSendMRecNo", noticeId + ""));
+        params.add(new NetParams("sSaveType", dbType));
+        params.add(new NetParams("iBillType", "2"));
+        params.add(new NetParams("iCut", iCut + ""));
+        params.add(new NetParams("sBarCodes", getBarcode()));
+        return params;
+    }
+
+    private String getBarcode() {
+        String codes = "";
+        for (PublicItem code : datas) {
+            codes = codes + code.getOutCode().toString();
+        }
+        Log.d("codes", codes);
+        return codes;
+    }
+
+    private void save(boolean submit) {
+        if (codes.size() == 0) {
+            Toast("条码不能为空");
+            return;
+        }
+        LoadingDialog.showDialogForLoading(getActivity());
+        new NetUtil(saveParams(), url, new ResponseListener() {
+            @Override
+            public void onSuccess(String string) {
+                try {
+                    JSONObject jsonObject = new JSONObject(string);
+                    LoadingFinish(null);
+                    if (jsonObject.optBoolean("success")) {
+                        if (submit) {
+                            submit();
+                        } else {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                }
+                            });
+
+                        }
+                    } else {
+                        LoadingFinish(jsonObject.optString("message"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_json));
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.empty_data));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_data));
+                }
+            }
+
+            @Override
+            public void onFail(IOException e) {
+                e.printStackTrace();
+                LoadingFinish(e.getMessage());
+            }
+        });
+    }
+
+    private void isSubmit() {
+        if (submitDialog == null) {
+            submitDialog = new JudgeDialog(getActivity(), R.style.JudgeDialog, "是否提交？", new JudgeDialog.OnCloseListener() {
+                @Override
+                public void onClick(boolean confirm) {
+                    if (confirm)
+                        save(true);
+                }
+            });
+        }
+        submitDialog.show();
+    }
+
+    private List<NetParams> submitParams() {
+        List<NetParams> params = new ArrayList<>();
+        params.add(new NetParams("otype", Otypes.MMStockProductOutMSubmit));
+        params.add(new NetParams("userid", userid));
+        params.add(new NetParams("database", companyCode));
+        params.add(new NetParams("iRecNo", iRecNo + ""));
+        return params;
+    }
+
+    private void submit() {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                LoadingFinish(null);
+                LoadingDialog.showDialogForLoading(getActivity());
+            }
+        });
+        new NetUtil(submitParams(), url, new ResponseListener() {
+            @Override
+            public void onSuccess(String string) {
+                try {
+                    JSONObject jsonObject = new JSONObject(string);
+                    if (jsonObject.optBoolean("success")) {
+                        LoadingFinish(null);
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+//                                setResult(DeleteCode, new Intent().putExtra("position", position));
+//                                finish();
+                            }
+                        });
+
+                    } else {
+                        LoadingFinish(jsonObject.optString("message"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_json));
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.empty_data));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_data));
+                }
+            }
+
+            @Override
+            public void onFail(IOException e) {
+                e.printStackTrace();
+                LoadingFinish(e.getMessage());
+            }
+        });
     }
 
     public interface OnResultListener {

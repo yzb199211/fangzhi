@@ -92,6 +92,8 @@ public class NoticeSelectFragment extends Fragment {
     private int iCut = 0;
     private int iFinish = 0;
 
+    private Storage storage;
+
     private List<Notice> notices;
     private List<Storage> storages;
 
@@ -348,6 +350,7 @@ public class NoticeSelectFragment extends Fragment {
                             if (storageId != storages.get(options1).getIBscDataStockMRecNo()) {
                                 storageId = storages.get(options1).getIBscDataStockMRecNo();
                                 tvStorage.setText(storages.get(options1).getSStockName());
+                                storage = storages.get(options1);
                             }
                         }
                     })
@@ -429,7 +432,9 @@ public class NoticeSelectFragment extends Fragment {
                     adapter.setOnItemClickListener(new OnItemClickListener() {
                         @Override
                         public void onItemClick(View view, int position) {
-                            onButtonPressed(new Gson().toJson(notices.get(position)));
+                            Notice notice = notices.get(position);
+                            notice.setStorage(storage);
+                            onButtonPressed(new Gson().toJson(notice));
                         }
                     });
                     rvItem.setAdapter(adapter);

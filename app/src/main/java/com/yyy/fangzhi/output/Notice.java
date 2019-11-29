@@ -1,5 +1,7 @@
 package com.yyy.fangzhi.output;
 
+import com.yyy.fangzhi.model.Storage;
+
 public class Notice {
 
     /**
@@ -39,6 +41,15 @@ public class Notice {
     private int iBillType;
     private String sName;
     private String sColorID;
+    private Storage storage;
+
+    public Storage getStorage() {
+        return storage;
+    }
+
+    public void setStorage(Storage storage) {
+        this.storage = storage;
+    }
 
     public int getIRecNo() {
         return iRecNo;

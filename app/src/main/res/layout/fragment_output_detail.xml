@@ -23,145 +23,220 @@
             android:text="@string/empty" />
     </FrameLayout>
 
-    <LinearLayout
-        android:id="@+id/fl_msg"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:id="@+id/ll_one"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_40"
-            android:background="@color/white"
-            android:orientation="horizontal"
-            android:paddingLeft="@dimen/dp_10"
-            android:paddingRight="@dimen/dp_10"
-            android:visibility="gone">
-
-            <com.yyy.fangzhi.view.TextItem
-                android:id="@+id/it_storage"
-                android:layout_width="@dimen/dp_0"
-                android:layout_height="match_parent"
-                android:layout_weight="1" />
-
-            <com.yyy.fangzhi.view.TextItem
-                android:id="@+id/it_notice"
-                android:layout_width="@dimen/dp_0"
-                android:layout_height="match_parent"
-                android:layout_weight="1" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/ll_two"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_40"
-            android:layout_marginTop="@dimen/dp_1"
-            android:background="@color/white"
-            android:orientation="horizontal"
-            android:paddingLeft="@dimen/dp_10"
-            android:paddingRight="@dimen/dp_10"
-            android:visibility="gone">
-
-            <com.yyy.fangzhi.view.TextItem
-                android:id="@+id/it_cus"
-                android:layout_width="@dimen/dp_0"
-                android:layout_height="match_parent"
-                android:layout_weight="1" />
-
-            <com.yyy.fangzhi.view.TextItem
-                android:id="@+id/it_worker"
-                android:layout_width="@dimen/dp_0"
-                android:layout_height="match_parent"
-                android:layout_weight="1" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/ll_three"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_40"
-            android:layout_marginTop="@dimen/dp_1"
-            android:background="@color/white"
-            android:orientation="horizontal"
-            android:paddingLeft="@dimen/dp_10"
-            android:paddingRight="@dimen/dp_10"
-            android:visibility="gone">
-
-            <com.yyy.fangzhi.view.TextItem
-                android:id="@+id/it_date"
-                android:layout_width="@dimen/dp_0"
-                android:layout_height="match_parent"
-                android:layout_weight="1" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:singleLine="false"
-                android:text="红冲"
-                android:textColor="@color/default_content_color"
-                android:textSize="@dimen/sp_14" />
-
-            <Switch
-                android:id="@+id/sv_red"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right|center_vertical"
-                android:layout_marginLeft="@dimen/dp_10"
-                android:checked="true"
-                android:clickable="false"
-                android:switchMinWidth="@dimen/dp_30"
-                android:thumb="@drawable/switch_thumb"
-                android:track="@drawable/switch_track" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/ll_four"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_40"
-        android:layout_marginTop="@dimen/dp_1"
-        android:background="@color/white"
-        android:orientation="horizontal"
-        android:visibility="gone">
-
-        <com.yyy.fangzhi.view.EditListenerView
-            android:id="@+id/et_code"
-            android:layout_width="@dimen/dp_0"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@color/white"
-            android:gravity="center_vertical"
-            android:hint="@string/hint_code"
-            android:inputType="number"
-            android:paddingLeft="@dimen/dp_10"
-            android:paddingRight="@dimen/dp_10"
-            android:singleLine="true"
-            android:textColor="@color/default_content_color"
-            android:textSize="@dimen/sp_14" />
-
-        <TextView
-            android:id="@+id/tv_clear"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="@dimen/dp_1"
-            android:background="@color/white"
-            android:gravity="center"
-            android:paddingLeft="@dimen/dp_10"
-            android:paddingRight="@dimen/dp_10"
-            android:text="清空"
-            android:textColor="@color/red"
-            android:textSize="@dimen/sp_14" />
-    </LinearLayout>
-
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_item"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_0"
-        android:layout_marginTop="@dimen/dp_1"
-        android:layout_weight="1"
-        android:visibility="gone" />
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/ll_one"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_40"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="@dimen/dp_10"
+                android:paddingRight="@dimen/dp_10"
+                android:visibility="gone">
+
+                <com.yyy.fangzhi.view.TextItem
+                    android:id="@+id/it_storage"
+                    android:layout_width="@dimen/dp_0"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+
+                <com.yyy.fangzhi.view.TextItem
+                    android:id="@+id/it_notice"
+                    android:layout_width="@dimen/dp_0"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_two"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_40"
+                android:layout_marginTop="@dimen/dp_1"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="@dimen/dp_10"
+                android:paddingRight="@dimen/dp_10"
+                android:visibility="gone">
+
+                <com.yyy.fangzhi.view.TextItem
+                    android:id="@+id/it_cus"
+                    android:layout_width="@dimen/dp_0"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+
+                <com.yyy.fangzhi.view.TextItem
+                    android:id="@+id/it_worker"
+                    android:layout_width="@dimen/dp_0"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_three"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_40"
+                android:layout_marginTop="@dimen/dp_1"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="@dimen/dp_10"
+                android:paddingRight="@dimen/dp_10"
+                android:visibility="gone">
+
+                <com.yyy.fangzhi.view.TextItem
+                    android:id="@+id/it_date"
+                    android:layout_width="@dimen/dp_0"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:singleLine="false"
+                    android:text="红冲"
+                    android:textColor="@color/default_content_color"
+                    android:textSize="@dimen/sp_14" />
+
+                <Switch
+                    android:id="@+id/sv_red"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right|center_vertical"
+                    android:layout_marginLeft="@dimen/dp_10"
+                    android:checked="true"
+                    android:clickable="false"
+                    android:switchMinWidth="@dimen/dp_30"
+                    android:thumb="@drawable/switch_thumb"
+                    android:track="@drawable/switch_track" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_five"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_40"
+                android:layout_marginTop="@dimen/dp_1"
+                android:background="@color/white"
+                android:orientation="horizontal"
+                android:paddingLeft="@dimen/dp_10"
+                android:paddingRight="@dimen/dp_10"
+                android:visibility="gone">
+
+                <com.yyy.fangzhi.view.TextItem
+                    android:id="@+id/it_qty"
+                    android:layout_width="@dimen/dp_0"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+
+                <com.yyy.fangzhi.view.TextItem
+                    android:id="@+id/it_num"
+                    android:layout_width="@dimen/dp_0"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_six"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_40"
+                android:layout_marginTop="@dimen/dp_1"
+                android:background="@color/white"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="修剪米数："
+                    android:textColor="@color/default_text_color"
+                    android:textSize="@dimen/sp_14" />
+
+                <com.yyy.fangzhi.view.EditListenerView
+                    android:id="@+id/et_cut"
+                    android:layout_width="@dimen/dp_0"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@color/white"
+                    android:gravity="center_vertical"
+                    android:hint="@string/hint_code"
+                    android:inputType="number"
+                    android:paddingLeft="@dimen/dp_10"
+                    android:paddingRight="@dimen/dp_10"
+                    android:singleLine="true"
+                    android:textColor="@color/default_content_color"
+                    android:textSize="@dimen/sp_14" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_four"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_40"
+                android:layout_marginTop="@dimen/dp_1"
+                android:background="@color/white"
+                android:orientation="horizontal"
+                android:paddingLeft="@dimen/dp_10"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="条码扫描："
+                    android:textColor="@color/default_text_color"
+                    android:textSize="@dimen/sp_14" />
+
+                <com.yyy.fangzhi.view.EditListenerView
+                    android:id="@+id/et_code"
+                    android:layout_width="@dimen/dp_0"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@color/white"
+                    android:gravity="center_vertical"
+                    android:hint="@string/hint_code"
+                    android:inputType="textEmailAddress"
+                    android:paddingLeft="@dimen/dp_10"
+                    android:paddingRight="@dimen/dp_10"
+                    android:singleLine="true"
+                    android:textColor="@color/default_content_color"
+                    android:textSize="@dimen/sp_14" />
+
+                <TextView
+                    android:id="@+id/tv_clear"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="@dimen/dp_1"
+                    android:background="@color/white"
+                    android:gravity="center"
+                    android:paddingLeft="@dimen/dp_10"
+                    android:paddingRight="@dimen/dp_10"
+                    android:text="清空"
+                    android:textColor="@color/red"
+                    android:textSize="@dimen/sp_14" />
+            </LinearLayout>
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_item"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_0"
+                android:layout_marginTop="@dimen/dp_1"
+                android:layout_weight="1"
+                android:visibility="gone" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <include layout="@layout/bottom_layout" />
 </LinearLayout>
