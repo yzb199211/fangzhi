@@ -13,7 +13,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name=".dialog.SelectDialog"></activity>
+        <activity android:name=".output.OutputEditDialog"></activity>
+        <activity android:name=".dialog.SelectDialog" />
         <activity android:name=".output.NoticeSelectActivity" />
         <activity android:name=".output.OutputDetailActivity" />
         <activity android:name=".input.InputDetailActivity" />

@@ -65,7 +65,7 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.VH> {
         return list.size();
     }
 
-    public class VH extends RecyclerView.ViewHolder {
+    protected class VH extends RecyclerView.ViewHolder {
         TextItem tiNo;
         TextItem tiFinish;
         TextItem tiOrder;

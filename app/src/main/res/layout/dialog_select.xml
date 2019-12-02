@@ -21,4 +21,14 @@
         android:id="@+id/rv_item"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_400" />
+
+    <TextView
+        android:id="@+id/tv_close"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_40"
+        android:background="@color/blue"
+        android:gravity="center"
+        android:text="@string/close"
+        android:textColor="@color/white"
+        android:textSize="@dimen/sp_14" />
 </LinearLayout>
