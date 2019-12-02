@@ -408,6 +408,7 @@ public class NoticeSelectActivity extends AppCompatActivity {
                             intent.setClass(NoticeSelectActivity.this, OutputDetailActivity.class);
                             intent.putExtra("title", title);
                             intent.putExtra("formid", formid);
+                            intent.putExtra("iRecNo", notices.get(position).getIRecNo());
                             startActivity(intent);
                         }
                     });

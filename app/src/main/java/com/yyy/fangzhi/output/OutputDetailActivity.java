@@ -48,12 +48,12 @@ public class OutputDetailActivity extends FragmentActivity implements NoticeSele
         initFragment();
         initIntentData();
         initView();
-        setFragment();
     }
 
     private void initView() {
         ivBack.setVisibility(View.VISIBLE);
         ivRight.setVisibility(View.GONE);
+        setFragment();
     }
 
     private void setFragment() {

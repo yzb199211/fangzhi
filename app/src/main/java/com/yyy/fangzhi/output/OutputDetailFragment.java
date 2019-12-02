@@ -121,6 +121,7 @@ public class OutputDetailFragment extends Fragment {
     private String storageName;
     private String date;
     private String dbType;
+    private String workerName;
 
     private int formid = 0;
 
@@ -131,6 +132,8 @@ public class OutputDetailFragment extends Fragment {
     private int customerId = 0;
     private int noticeId = 0;
     private int storageId = 0;
+
+    private boolean canDelete;
 
     private List<BarcodeColumn> barcodeColumns;
     private List<PublicItem> datas;
@@ -210,6 +213,7 @@ public class OutputDetailFragment extends Fragment {
         address = (String) preferencesHelper.getSharedPreference("address", "");
         companyCode = (String) preferencesHelper.getSharedPreference("companyCode", "");
         url = address + NetConfig.server + NetConfig.PDAHandler;
+        workerName = (String) preferencesHelper.getSharedPreference("userName", "");
     }
 
     private void getIntentData() {
@@ -221,15 +225,25 @@ public class OutputDetailFragment extends Fragment {
     private void initView() {
         bottomLayout.setVisibility(View.GONE);
         svRed.setChecked(iRed == 0 ? false : true);
-        itStorage.setContent(storageName).setContentColor(getActivity().getResources().getColor(R.color.default_content_color)).setTitle("仓库：");
-        itNotice.setContent(noticeName).setContentColor(getActivity().getResources().getColor(R.color.default_content_color)).setTitle("通知单：");
-        itDate.setContent(date).setContentColor(getActivity().getResources().getColor(R.color.default_content_color)).setTitle("日期：");
-        itCus.setContent(customerName).setContentColor(getActivity().getResources().getColor(R.color.default_content_color)).setTitle("客户：");
-        itWorker.setContent(userid).setContentColor(getActivity().getResources().getColor(R.color.default_content_color)).setTitle("下单：");
-        if (iRecNo == 0)
-            tvDelete.setVisibility(View.INVISIBLE);
+
         initRecycle();
         setCodeListener();
+    }
+
+    private void setViewData() {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                itStorage.setContent(storageName).setContentColor(getActivity().getResources().getColor(R.color.default_content_color)).setTitle("仓库：");
+                itNotice.setContent(noticeName).setContentColor(getActivity().getResources().getColor(R.color.default_content_color)).setTitle("通知单：");
+                itDate.setContent(date).setContentColor(getActivity().getResources().getColor(R.color.default_content_color)).setTitle("日期：");
+                itCus.setContent(customerName).setContentColor(getActivity().getResources().getColor(R.color.default_content_color)).setTitle("客户：");
+                itWorker.setContent(workerName).setContentColor(getActivity().getResources().getColor(R.color.default_content_color)).setTitle("下单：");
+                if (!canDelete)
+                    tvDelete.setVisibility(View.INVISIBLE);
+            }
+        });
+
     }
 
     private void initRecycle() {
@@ -277,7 +291,7 @@ public class OutputDetailFragment extends Fragment {
                 try {
                     JSONObject jsonObject = new JSONObject(string);
                     if (jsonObject.optBoolean("success")) {
-                        List<PublicItem> list = initBarcodeData(removeRepeat(jsonObject.optJSONArray("data")));
+                        List<PublicItem> list = initBarcodeData(iCut == 0 ? removeRepeat(jsonObject.optJSONArray("data")) : jsonObject.optJSONArray("data"));
                         if (list != null && list.size() > 0) {
                             datas.addAll(0, list);
                             refreshList();
@@ -340,8 +354,11 @@ public class OutputDetailFragment extends Fragment {
                         initBarcodeColumnsData(jsonObject.optJSONObject("info").optString("formColumns"));
                         if (iRecNo == 0) {
                             iRecNo = jsonObject.optInt("key", 0);
+                            canDelete = false;
+                            setViewData();
                         } else {
                             JSONObject data = jsonObject.optJSONObject("data");
+//                            Log.d("mainData", data.optJSONArray("mainData").optString(0));
                             setMainData(data.optJSONArray("mainData").optJSONObject(0));
                             setChildData(data.optJSONArray("childData"));
                         }
@@ -379,10 +396,21 @@ public class OutputDetailFragment extends Fragment {
 
     private void setMainData(JSONObject mainData) throws NullPointerException {
         storageId = mainData.optInt("iBscDataStockMRecNo", 0);
+        storageName = mainData.optString("sStockName");
+        iRecNo = mainData.optInt("iRecNo", 0);
+        iRed = mainData.optInt("iRed", 0);
+        iCut = mainData.optInt("iCut", 0);
+        customerId = mainData.optInt("iBscDataCustomerRecNo", 0);
+        customerName = mainData.optString("sCustShortName");
+        noticeId = mainData.optInt("iSDSendMRecNo");
+        noticeName = mainData.optString("sSendBillNo");
+        workerName = mainData.optString("sInputUserName");
+        date = mainData.optString("dDate").replace("T", " ");
+        canDelete = true;
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
+                setViewData();
             }
         });
 

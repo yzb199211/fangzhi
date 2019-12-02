@@ -322,9 +322,9 @@ public class LoginActivity extends BaseActivity {
         Intent intent = new Intent();
         intent.setClass(LoginActivity.this, MainActivity.class);
         intent.putExtra("data", data);
-        Log.e("data", data);
+//        Log.e("data", data);
         intent.putExtra("num", num);
-        Log.e("num", num);
+//        Log.e("num", num);
         preferencesHelper.put("userid", model.getTables().getPerson().get(0).getSCode());
         preferencesHelper.put("userName", model.getTables().getPerson().get(0).getSName());
         preferencesHelper.put("userDepartment", model.getTables().getPerson().get(0).getSClassName());
