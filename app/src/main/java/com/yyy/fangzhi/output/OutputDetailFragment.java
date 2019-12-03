@@ -13,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,7 +24,6 @@ import com.google.gson.reflect.TypeToken;
 import com.yyy.fangzhi.R;
 import com.yyy.fangzhi.dialog.JudgeDialog;
 import com.yyy.fangzhi.dialog.LoadingDialog;
-import com.yyy.fangzhi.input.InputDetailActivity;
 import com.yyy.fangzhi.interfaces.OnEntryListener;
 import com.yyy.fangzhi.interfaces.OnItemClickListener;
 import com.yyy.fangzhi.interfaces.ResponseListener;
@@ -58,10 +58,14 @@ import butterknife.OnClick;
 import butterknife.Unbinder;
 
 import static com.yyy.fangzhi.util.ResultCode.DeleteCode;
+import static com.yyy.fangzhi.util.ResultCode.EditCode;
+import static com.yyy.fangzhi.util.ResultCode.FailureCode;
 import static com.yyy.fangzhi.util.ResultCode.RefreshCode;
+import static com.yyy.fangzhi.util.ResultCode.SuccessCode;
 
 public class OutputDetailFragment extends Fragment {
     private static final String ARG_PARAM1 = "data";
+    private static final String ARG_PARAM2 = "position";
 
     @BindView(R.id.it_storage)
     TextItem itStorage;
@@ -150,10 +154,16 @@ public class OutputDetailFragment extends Fragment {
 
     private String fisrtData;
 
-    public static OutputDetailFragment newInstance(String data) {
+    private List<Select> temporary;
+    private List<PublicItem> temporaryList;
+
+    int pos;
+
+    public static OutputDetailFragment newInstance(String data, int pos) {
         OutputDetailFragment fragment = new OutputDetailFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, data);
+        args.putInt(ARG_PARAM2, pos);
         fragment.setArguments(args);
         return fragment;
     }
@@ -164,6 +174,7 @@ public class OutputDetailFragment extends Fragment {
         preferencesHelper = new SharedPreferencesHelper(getActivity(), getString(R.string.preferenceCache));
         if (getArguments() != null) {
             fisrtData = getArguments().getString(ARG_PARAM1);
+            pos = getArguments().getInt(ARG_PARAM2);
             if (StringUtil.isNotEmpty(fisrtData)) {
                 Notice notice = new Gson().fromJson(fisrtData, Notice.class);
                 getNotice(notice);
@@ -205,6 +216,8 @@ public class OutputDetailFragment extends Fragment {
         barcodeColumns = new ArrayList<>();
         datas = new ArrayList<>();
         codes = new ArrayList<>();
+        temporary = new ArrayList<>();
+        temporaryList = new ArrayList<>();
     }
 
 
@@ -291,10 +304,16 @@ public class OutputDetailFragment extends Fragment {
                 try {
                     JSONObject jsonObject = new JSONObject(string);
                     if (jsonObject.optBoolean("success")) {
+                        temporary.clear();
                         List<PublicItem> list = initBarcodeData(iCut == 0 ? removeRepeat(jsonObject.optJSONArray("data")) : jsonObject.optJSONArray("data"));
-                        if (list != null && list.size() > 0) {
+                        if (list != null && list.size() > 0 && temporary.size() == 0) {
                             datas.addAll(0, list);
                             refreshList();
+                        } else if (temporary.size() > 0) {
+                            if (list != null && list.size() > 0)
+                                temporaryList.addAll(list);
+                            LoadingFinish(null);
+                            selectCode();
                         } else {
                             LoadingFinish(getString(R.string.empty_code));
                         }
@@ -318,6 +337,19 @@ public class OutputDetailFragment extends Fragment {
             public void onFail(IOException e) {
                 e.printStackTrace();
                 LoadingFinish(e.getMessage());
+            }
+        });
+    }
+
+    private void selectCode() {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Log.e("json", temporary.size() + "");
+                Intent intent = new Intent();
+                intent.putExtra("data", new Gson().toJson(temporary));
+                intent.setClass(getActivity(), SelectDialog.class);
+                startActivityForResult(intent, 0);
             }
         });
     }
@@ -429,11 +461,28 @@ public class OutputDetailFragment extends Fragment {
                 });
             }
         }
-        datas.addAll(initBarcodeData(childData));
+        datas.addAll(initBarcodeData2(childData));
         refreshList();
     }
 
     private List<PublicItem> initBarcodeData(JSONArray jsonArray) throws
+            JSONException, NullPointerException, Exception {
+        List<PublicItem> list = new ArrayList<>();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONArray array = jsonArray.optJSONObject(i).optJSONArray("NeedSelectTables");
+            if (array != null || array.length() > 0) {
+                Select item = new Select();
+                item.setData(jsonArray.optJSONObject(i).optString("NeedSelectTables"));
+                item.setTitle(jsonArray.optJSONObject(i).optString("sBarCode"));
+                temporary.add(item);
+            } else {
+                list.add(getBarcodeItem(jsonArray.optJSONObject(i)));
+            }
+        }
+        return list;
+    }
+
+    private List<PublicItem> initBarcodeData2(JSONArray jsonArray) throws
             JSONException, NullPointerException, Exception {
         List<PublicItem> list = new ArrayList<>();
         for (int i = 0; i < jsonArray.length(); i++) {
@@ -448,7 +497,15 @@ public class OutputDetailFragment extends Fragment {
         item.setCode(jsonObject.optString("sBarCode"));
         item.setOutCode(getOutCode(jsonObject));
         List<ConfigureInfo> list = new ArrayList<>();
-        for (BarcodeColumn column : barcodeColumns) {
+//        for (BarcodeColumn column : barcodeColumns) {
+        for (int i = 0; i < barcodeColumns.size(); i++) {
+            BarcodeColumn column = barcodeColumns.get(i);
+            if (column.getSFieldsName().equals("sTrayCode"))
+                item.setTrayPos(i);
+            if (column.getSFieldsName().equals("fQty"))
+                item.setQtyPos(i);
+            if (column.getSFieldsName().equals("fFlawQty"))
+                item.setQtyFlawPos(i);
             if (column.getIHide() == 0) {
                 ConfigureInfo info = new ConfigureInfo();
                 info.setSingleLine(true);
@@ -469,6 +526,7 @@ public class OutputDetailFragment extends Fragment {
         }
         item.setList(list);
         item.setId(jsonObject.optInt("iRecNo", 0));
+
         return item;
     }
 
@@ -507,7 +565,9 @@ public class OutputDetailFragment extends Fragment {
                     adapter.setOnItemClickListener(new OnItemClickListener() {
                         @Override
                         public void onItemClick(View view, int position) {
-                            isRemove(position);
+//                            isRemove(position);
+                            editCode(position);
+
                         }
                     });
                     rvItem.setAdapter(adapter);
@@ -517,6 +577,15 @@ public class OutputDetailFragment extends Fragment {
             }
         });
 
+    }
+
+    private void editCode(int position) {
+        Intent intent = new Intent();
+        intent.putExtra("pos", position);
+        intent.putExtra("data", new Gson().toJson(datas.get(position).getOutCode()));
+        intent.setClass(getActivity(), OutputEditDialog.class);
+//        intent.addFlags( Intent.FLAG_ACTIVITY_NO_ANIMATION );
+        startActivityForResult(intent, 1);
     }
 
     private void isRemove(int position) {
@@ -625,8 +694,8 @@ public class OutputDetailFragment extends Fragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-//                                setResult(DeleteCode, new Intent().putExtra("position", position));
-//                                finish();
+                                getActivity().setResult(DeleteCode, new Intent().putExtra("position", pos));
+                                getActivity().finish();
                             }
                         });
                     } else {
@@ -696,9 +765,10 @@ public class OutputDetailFragment extends Fragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
+                                    getActivity().setResult(RefreshCode);
+                                    getActivity().finish();
                                 }
                             });
-
                         }
                     } else {
                         LoadingFinish(jsonObject.optString("message"));
@@ -763,8 +833,8 @@ public class OutputDetailFragment extends Fragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-//                                setResult(DeleteCode, new Intent().putExtra("position", position));
-//                                finish();
+                                getActivity().setResult(DeleteCode, new Intent().putExtra("position", pos));
+                                getActivity().finish();
                             }
                         });
 
@@ -809,5 +879,81 @@ public class OutputDetailFragment extends Fragment {
 
     private void Toast(String msg) {
         Toasts.showShort(getActivity(), msg);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+//        Log.e("data", resultCode + "");
+        if (data != null) {
+            initResult(data, resultCode);
+        }
+    }
+
+    private void initResult(Intent data, int resultCode) {
+        switch (resultCode) {
+            case EditCode:
+                initResultEdit(data);
+                break;
+            case FailureCode:
+                removeCode(data.getStringExtra("data"));
+                clearTemporary();
+                break;
+            case SuccessCode:
+                try {
+                    String codes = data.getStringExtra("data");
+                    datas.addAll(temporaryList);
+                    clearTemporary();
+                    getCodes(new JSONArray(codes));
+                    refreshList();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void removeCode(String data) {
+        for (PublicItem item : temporaryList) {
+            if (codes.contains(item.getCode()))
+                codes.remove(item.getCode());
+        }
+        List<String> removes = new Gson().fromJson(data, new TypeToken<List<String>>() {
+        }.getType());
+        for (String s : removes) {
+            if (codes.contains(s))
+                codes.remove(s);
+        }
+    }
+
+    private void getCodes(JSONArray jsonArray) throws NullPointerException, Exception {
+        List<PublicItem> list = initBarcodeData2(jsonArray);
+        if (list != null && list.size() > 0) {
+            datas.addAll(0, list);
+        }
+    }
+
+    private void clearTemporary() {
+        temporary.clear();
+        temporaryList.clear();
+    }
+
+    private void initResultEdit(Intent data) {
+        int pos = data.getIntExtra("pos", 0);
+        PublicItem.OutCode code = new Gson().fromJson(data.getStringExtra("code"), PublicItem.OutCode.class);
+        datas.get(pos).getOutCode().setTray(code.getTray());
+        datas.get(pos).getOutCode().setOutQty(code.getOutQty());
+        datas.get(pos).getOutCode().setFlawQty(code.getFlawQty());
+        datas.get(pos).setQty(code.getOutQty());
+        datas.get(pos).setFlawQty(code.getFlawQty());
+        datas.get(pos).setTray(code.getTray());
+        refreshList();
     }
 }

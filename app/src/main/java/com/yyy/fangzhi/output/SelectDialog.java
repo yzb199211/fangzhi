@@ -1,7 +1,8 @@
-package com.yyy.fangzhi.dialog;
+package com.yyy.fangzhi.output;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -39,8 +40,8 @@ public class SelectDialog extends AppCompatActivity {
 
     List<Select> datas = new ArrayList<>();
     List<SelectItem> selectItems = new ArrayList<>();
-    List<String> selectData = new ArrayList<>();
-
+    List<SelectItem> selectData = new ArrayList<>();
+    List<String> codes = new ArrayList<>();
     SelectAdapter adapter;
 
 
@@ -66,6 +67,7 @@ public class SelectDialog extends AppCompatActivity {
     private void getData() {
         datas = new Gson().fromJson(getIntent().getStringExtra("data"), new TypeToken<List<Select>>() {
         }.getType());
+
     }
 
 
@@ -75,7 +77,13 @@ public class SelectDialog extends AppCompatActivity {
             adapter.setOnItemClickListener(new OnItemClickListener() {
                 @Override
                 public void onItemClick(View view, int position) {
-                    selectData.add(new Gson().toJson(selectItems.get(position)));
+                    selectData.add(selectItems.get(position));
+                    try {
+                        Log.e("data", datas.get(pos).select(position));
+                        Log.e("data1", new Gson().toJson(selectItems.get(position)));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     if (pos < datas.size() - 1) {
                         pos = pos + 1;
                         setView(pos);
@@ -106,7 +114,18 @@ public class SelectDialog extends AppCompatActivity {
 
     @OnClick(R.id.tv_close)
     public void onViewClicked() {
-        setResult(FailureCode);
+        for (Select item : datas) {
+            codes.add(item.getTitle());
+        }
+        Intent intent = new Intent();
+        intent.putExtra("data", new Gson().toJson(codes));
+        setResult(FailureCode,intent);
         finish();
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(0, 0);
     }
 }

@@ -1,4 +1,4 @@
-package com.yyy.fangzhi.dialog;
+package com.yyy.fangzhi.output;
 
 import android.content.Context;
 import android.view.LayoutInflater;

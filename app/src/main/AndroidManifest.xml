@@ -13,12 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name=".output.OutputEditDialog"></activity>
-        <activity android:name=".dialog.SelectDialog" />
-        <activity android:name=".output.NoticeSelectActivity" />
-        <activity android:name=".output.OutputDetailActivity" />
-        <activity android:name=".input.InputDetailActivity" />
-        <activity android:name=".pubilc.PublicListActivity" />
+
         <activity
             android:name=".login.LoginActivity"
             android:screenOrientation="portrait"
@@ -29,6 +24,28 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".output.OutputEditDialog"
+            android:screenOrientation="portrait"
+            android:theme="@style/ActivityDialog" />
+        <activity
+            android:name=".output.SelectDialog"
+            android:screenOrientation="portrait"
+            android:theme="@style/ActivityDialog" />
+        <activity
+            android:name=".output.NoticeSelectActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".output.OutputDetailActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        <activity
+            android:name=".input.InputDetailActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        <activity
+            android:name=".pubilc.PublicListActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".main.MainActivity"
             android:screenOrientation="portrait" />

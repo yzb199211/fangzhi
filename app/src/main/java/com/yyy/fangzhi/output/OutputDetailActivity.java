@@ -88,7 +88,7 @@ public class OutputDetailActivity extends FragmentActivity implements NoticeSele
     }
 
     private void showDetail(String data) {
-        detailFragment = OutputDetailFragment.newInstance(data);
+        detailFragment = OutputDetailFragment.newInstance(data, position);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.add(R.id.fl_fragment, detailFragment);
         transaction.show(detailFragment);

@@ -3,23 +3,137 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:layout_marginLeft="@dimen/dp_10"
+    android:layout_marginRight="@dimen/dp_10"
+    android:background="@color/default_bg_color"
     android:orientation="vertical"
     tools:context=".output.OutputEditDialog">
 
     <TextView
         android:id="@+id/tv_title"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_40" />
+        android:layout_height="@dimen/dp_40"
+        android:background="@color/white"
+        android:gravity="center"
+        android:textColor="@color/default_text_color"
+        android:textSize="@dimen/sp_14" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/dp_40"
+        android:layout_marginTop="@dimen/dp_1"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:paddingLeft="@dimen/dp_10"
+            android:text="@string/qty_out"
+            android:textColor="@color/default_text_color"
+            android:textSize="@dimen/sp_14" />
 
+        <EditText
+            android:id="@+id/et_qty_out"
+            android:layout_width="@dimen/dp_0"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:inputType="numberDecimal"
+            android:paddingLeft="@dimen/dp_5"
+            android:singleLine="true"
+            android:textColor="@color/default_content_color"
+            android:textSize="@dimen/sp_14" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/dp_1"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:paddingLeft="@dimen/dp_10"
+            android:text="@string/qty_flaw"
+            android:textColor="@color/default_text_color"
+            android:textSize="@dimen/sp_14" />
+
+        <EditText
+            android:id="@+id/et_qty_flaw"
+            android:layout_width="@dimen/dp_0"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:inputType="numberDecimal"
+            android:paddingLeft="@dimen/dp_5"
+            android:singleLine="true"
+            android:textColor="@color/default_content_color"
+            android:textSize="@dimen/sp_14" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_tray"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_40"
+        android:layout_marginTop="@dimen/dp_1"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:paddingLeft="@dimen/dp_10"
+            android:text="@string/qty_out"
+            android:textColor="@color/default_text_color"
+            android:textSize="@dimen/sp_14" />
+
+        <EditText
+            android:id="@+id/et_tray"
+            android:layout_width="@dimen/dp_0"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:inputType="textEmailAddress"
+            android:paddingLeft="@dimen/dp_5"
+            android:singleLine="true"
+            android:textColor="@color/default_content_color"
+            android:textSize="@dimen/sp_14" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_40"
+        android:layout_marginTop="@dimen/dp_1"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_delete"
+            android:layout_width="@dimen/dp_0"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/bottom_delete"
+            android:clickable="true"
+            android:gravity="center"
+            android:text="@string/cancel"
+            android:textColor="@color/white" />
+
+        <TextView
+            android:id="@+id/tv_submit"
+            android:layout_width="@dimen/dp_0"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/bottom_submit"
+            android:clickable="true"
+            android:gravity="center"
+            android:text="@string/submit"
+            android:textColor="@color/white" />
     </LinearLayout>
 </LinearLayout>

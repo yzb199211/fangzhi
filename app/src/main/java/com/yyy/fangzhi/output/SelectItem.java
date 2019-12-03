@@ -1,4 +1,4 @@
-package com.yyy.fangzhi.dialog;
+package com.yyy.fangzhi.output;
 
 public class SelectItem {
 
@@ -57,12 +57,21 @@ public class SelectItem {
     private String fBulkShearCost;
     private String fTotal;
     private String fQty;
+    private String fFlawQty;
     private String iSDContractMRecNo;
     private String iSDContractDRecNo;
     private String iBscDataMatRecNo;
     private String iBscDataColorRecNo;
     private String iBscDataFlowerTypeRecNo;
     private String sUnitID;
+
+    public String getfFlawQty() {
+        return fFlawQty;
+    }
+
+    public void setfFlawQty(String fFlawQty) {
+        this.fFlawQty = fFlawQty;
+    }
 
     public String getSBarCode() {
         return sBarCode;

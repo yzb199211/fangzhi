@@ -9,6 +9,33 @@ public class PublicItem {
     int id;
     String Code;
     OutCode outCode;
+    int trayPos;
+    int qtyPos;
+    int qtyFlawPos;
+
+    public int getTrayPos() {
+        return trayPos;
+    }
+
+    public void setTrayPos(int trayPos) {
+        this.trayPos = trayPos;
+    }
+
+    public int getQtyPos() {
+        return qtyPos;
+    }
+
+    public void setQtyPos(int qtyPos) {
+        this.qtyPos = qtyPos;
+    }
+
+    public int getQtyFlawPos() {
+        return qtyFlawPos;
+    }
+
+    public void setQtyFlawPos(int qtyFlawPos) {
+        this.qtyFlawPos = qtyFlawPos;
+    }
 
     public OutCode getOutCode() {
         return outCode;
@@ -40,6 +67,18 @@ public class PublicItem {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public void setTray(String tray) {
+        list.get(trayPos).setContent(tray);
+    }
+
+    public void setQty(double qty) {
+        list.get(qtyPos).setContent(qty + "");
+    }
+
+    public void setFlawQty(double flawQty) {
+        list.get(qtyFlawPos).setContent(flawQty + "");
     }
 
     public static class OutCode {

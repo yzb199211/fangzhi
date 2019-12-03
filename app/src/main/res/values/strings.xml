@@ -74,5 +74,7 @@
     <string name="empty_code">无条码</string>
     <string name="empty_storage">仓库不能为空</string>
 
+    <string name="qty_out">发出米数</string>
+    <string name="qty_flaw">疵点米数</string>
 </resources>
 
