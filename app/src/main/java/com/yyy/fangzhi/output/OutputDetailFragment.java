@@ -292,7 +292,7 @@ public class OutputDetailFragment extends Fragment {
         params.add(new NetParams("iSDSendMRecNo", noticeId + ""));
         params.add(new NetParams("iBscDataCustomerRecNo", customerId + ""));
         params.add(new NetParams("iBscDataMatRecNo", 0 + ""));
-        params.add(new NetParams("iRed", 0 + ""));
+        params.add(new NetParams("iRed", iCut + ""));
         params.add(new NetParams("fCutQty", 0 + ""));
         return params;
     }
@@ -643,7 +643,7 @@ public class OutputDetailFragment extends Fragment {
         unbinder.unbind();
     }
 
-    @OnClick({R.id.tv_delete, R.id.tv_save, R.id.tv_submit})
+    @OnClick({R.id.tv_delete, R.id.tv_save, R.id.tv_submit, R.id.tv_empty})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.tv_delete:
@@ -654,6 +654,9 @@ public class OutputDetailFragment extends Fragment {
                 break;
             case R.id.tv_submit:
                 isSubmit();
+                break;
+            case R.id.tv_empty:
+                getData();
                 break;
             default:
                 break;
