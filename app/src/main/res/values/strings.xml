@@ -39,8 +39,12 @@
     <string name="title_review_list">审核列表</string>
     <string name="title_review_detail">审核详情</string>
     <string name="title_notice">发货通知单</string>
-
     <string name="title_menu">常用功能</string>
+
+    <string name="item_storage_in">调入仓库</string>
+    <string name="item_berch_in">调入仓位</string>
+    <string name="item_storage_out">调出仓库</string>
+
 
     <string name="btn_cancel">注销</string>
     <string name="btn_search">搜索</string>

@@ -1,8 +1,9 @@
-package com.yyy.fangzhi.input;
+package com.yyy.fangzhi.exchange;
 
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import com.google.gson.reflect.TypeToken;
 import com.yyy.fangzhi.R;
 import com.yyy.fangzhi.dialog.JudgeDialog;
 import com.yyy.fangzhi.dialog.LoadingDialog;
+import com.yyy.fangzhi.input.InputDetailActivity;
 import com.yyy.fangzhi.interfaces.OnEntryListener;
 import com.yyy.fangzhi.interfaces.OnItemClickListener;
 import com.yyy.fangzhi.interfaces.ResponseListener;
@@ -40,6 +42,7 @@ import com.yyy.fangzhi.util.net.NetUtil;
 import com.yyy.fangzhi.util.net.Otypes;
 import com.yyy.fangzhi.view.Configure.ConfigureInfo;
 import com.yyy.fangzhi.view.EditListenerView;
+import com.yyy.fangzhi.view.TextItem;
 import com.yyy.fangzhi.view.recycle.RecyclerViewDivider;
 import com.yyy.yyylibrary.pick.builder.OptionsPickerBuilder;
 import com.yyy.yyylibrary.pick.listener.OnOptionsSelectListener;
@@ -60,53 +63,53 @@ import butterknife.OnClick;
 import static com.yyy.fangzhi.util.ResultCode.DeleteCode;
 import static com.yyy.fangzhi.util.ResultCode.RefreshCode;
 
-public class InputDetailActivity extends AppCompatActivity {
-    private static final String TAG = "InputDetailActivity";
+public class ExchangeActivity extends AppCompatActivity {
+
     @BindView(R.id.tv_title)
     TextView tvTitle;
     @BindView(R.id.iv_right)
     ImageView ivRight;
-    @BindView(R.id.tv_storage)
-    TextView tvStorage;
-    @BindView(R.id.tv_berch)
-    TextView tvBerch;
-    @BindView(R.id.et_berch)
-    EditListenerView etBerch;
-    @BindView(R.id.iv_berch)
-    ImageView ivBerch;
-    @BindView(R.id.et_tray)
-    EditListenerView etTray;
-    @BindView(R.id.et_code)
-    EditListenerView etCode;
-    @BindView(R.id.rv_item)
-    RecyclerView rvItem;
     @BindView(R.id.fl_empty)
     FrameLayout flEmpty;
-    @BindView(R.id.tv_empty)
-    TextView tvEmpty;
-    @BindView(R.id.ll_storage)
-    LinearLayout llStorage;
-    @BindView(R.id.bottom_layout)
-    LinearLayout bottomLayout;
+    @BindView(R.id.ti_storage_out)
+    TextItem tiStorageOut;
+    @BindView(R.id.ti_storage_in)
+    TextItem tiStorageIn;
+    @BindView(R.id.ti_pos)
+    TextItem tiPos;
+    @BindView(R.id.ll_one)
+    LinearLayout llOne;
+    @BindView(R.id.rv_item)
+    RecyclerView rvItem;
     @BindView(R.id.tv_delete)
     TextView tvDelete;
-    @BindView(R.id.tv_clear)
-    TextView tvClear;
+    @BindView(R.id.bottom_layout)
+    LinearLayout bottomLayout;
+    @BindView(R.id.et_code)
+    EditListenerView etCode;
+    @BindView(R.id.it_qty)
+    TextItem itQty;
+    @BindView(R.id.it_num)
+    TextItem itNum;
+    @BindView(R.id.ll_three)
+    LinearLayout llThree;
+    @BindView(R.id.ll_two)
+    LinearLayout llTwo;
 
     String userid;
     String url;
     String address;
     String companyCode;
+    String title;
+    String dbType;
 
     int formid;
     int berchId;
     int iRecNo;
-    int orderNo = 0;
     int position;
+    int storageIdOut;
+    int storageIdIn;
 
-    String title;
-    int storageId;
-    String dbType;
 
     List<Storage> storages;
     List<Storage.BerCh> berChes;
@@ -116,7 +119,9 @@ public class InputDetailActivity extends AppCompatActivity {
 
     SharedPreferencesHelper preferencesHelper;
 
-    private OptionsPickerView pvStorage;
+
+    private OptionsPickerView pvStorageOut;
+    private OptionsPickerView pvStorageIn;
     private OptionsPickerView pvBerch;
 
     private PublicAdapter adapter;
@@ -129,19 +134,18 @@ public class InputDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_input_detail);
+        setContentView(R.layout.activity_exchange);
         ButterKnife.bind(this);
         preferencesHelper = new SharedPreferencesHelper(this, getString(R.string.preferenceCache));
         init();
-        getData();
     }
-
 
     private void init() {
         initList();
         getPreferenceData();
         getIntentData();
         initView();
+        getData();
     }
 
     private void initList() {
@@ -175,9 +179,57 @@ public class InputDetailActivity extends AppCompatActivity {
         ivRight.setVisibility(View.GONE);
         tvTitle.setText(title);
         bottomLayout.setVisibility(View.GONE);
+        tiStorageIn.setTitle(getString(R.string.item_storage_in));
+        tiStorageOut.setTitle(getString(R.string.item_storage_out));
+        tiPos.setTitle(getString(R.string.item_berch_in));
         initRecycle();
-        setBerchListener();
         setCodeListener();
+        setSelectListener();
+    }
+
+    private void setSelectListener() {
+        setStorageOutListener();
+        setStorageInListener();
+        setBerchInListener();
+    }
+
+    private void setStorageOutListener() {
+        tiStorageOut.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                if (storages.size() == 0) {
+                    getStorageData(1, false);
+                } else {
+                    pvStorageOut.show();
+                }
+            }
+        });
+    }
+
+    private void setStorageInListener() {
+        tiStorageIn.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                if (storages.size() == 0) {
+                    getStorageData(2, false);
+                } else {
+                    pvStorageOut.show();
+                }
+            }
+        });
+    }
+
+    private void setBerchInListener() {
+        tiPos.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                if (storages.size() == 0) {
+                    getStorageData(2, true);
+                } else {
+                    pvBerch.show();
+                }
+            }
+        });
     }
 
     private void initRecycle() {
@@ -185,40 +237,12 @@ public class InputDetailActivity extends AppCompatActivity {
         rvItem.addItemDecoration(new RecyclerViewDivider(this, LinearLayout.VERTICAL));
     }
 
-    private void setBerchListener() {
-        etBerch.setOnEntryListener(new OnEntryListener() {
-            @Override
-            public void onEntry(View view) {
-                KeyBoardUtil.hideInput(InputDetailActivity.this);
-                etBerch.setText("");
-                if (StringUtil.isNotEmpty(etBerch.getText().toString())) {
-                    if (getBerch(etBerch.getText().toString()) != 0) {
-                        berchId = getBerch(etBerch.getText().toString());
-                    } else {
-                        Toast(getString(R.string.error_berch));
-                    }
-                }
-            }
-        });
-
-    }
-
-    private int getBerch(String s) {
-        for (Storage.BerCh item : berChes) {
-            if (s.equals(item.getName())) {
-                tvBerch.setText(item.getName());
-                return item.getId();
-            }
-        }
-        return 0;
-    }
-
 
     private void setCodeListener() {
         etCode.setOnEntryListener(new OnEntryListener() {
             @Override
             public void onEntry(View view) {
-                KeyBoardUtil.hideInput(InputDetailActivity.this);
+                KeyBoardUtil.hideInput(ExchangeActivity.this);
                 String code = etCode.getText().toString();
                 etCode.setText("");
                 if (codes.contains(code)) {
@@ -231,6 +255,181 @@ public class InputDetailActivity extends AppCompatActivity {
             }
         });
     }
+
+    private List<NetParams> getStorageParams() {
+        List<NetParams> params = new ArrayList<>();
+        params.add(new NetParams("otype", Otypes.GetStockMD));
+        params.add(new NetParams("userid", userid));
+        params.add(new NetParams("database", companyCode));
+        return params;
+    }
+
+    private void getStorageData(int type, boolean isBerch) {
+        LoadingDialog.showDialogForLoading(this);
+        new NetUtil(getStorageParams(), url, new ResponseListener() {
+            @Override
+            public void onSuccess(String string) {
+                try {
+                    JSONObject jsonObject = new JSONObject(string);
+                    if (jsonObject.optBoolean("success")) {
+                        storages.addAll(new Gson().fromJson(initStorageData(jsonObject.optJSONArray("tables")), new TypeToken<List<Storage>>() {
+                        }.getType()));
+                        LoadingFinish(null);
+                        initPick(type, isBerch);
+
+                    } else {
+                        LoadingFinish(jsonObject.optString("message"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_json));
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.empty_data));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_data));
+                }
+            }
+
+            @Override
+            public void onFail(IOException e) {
+                e.printStackTrace();
+                LoadingFinish(e.getMessage());
+            }
+        });
+    }
+
+
+    private String initStorageData(JSONArray jsonArray) throws NullPointerException, Exception {
+        return jsonArray.optString(0);
+    }
+
+    private void initPick(int type, boolean isBerch) {
+        if (type == 2) {
+            initStoragePickIn(isBerch);
+        } else {
+            initStoragePickOut();
+        }
+    }
+
+    private void initStoragePickOut() {
+        if (storages.size() > 0) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    pvStorageOut = new OptionsPickerBuilder(ExchangeActivity.this, new OnOptionsSelectListener() {
+                        @Override
+                        public void onOptionsSelect(int options1, int options2, int options3, View v) {
+                            if (storageIdOut != storages.get(options1).getIBscDataStockMRecNo()) {
+                                storageIdOut = storages.get(options1).getIBscDataStockMRecNo();
+                                tiStorageOut.setContent(storages.get(options1).getSStockName());
+                            }
+                        }
+                    })
+                            .setTitleText("调出仓库选择")
+                            .setContentTextSize(18)//设置滚轮文字大小
+                            .setDividerColor(Color.LTGRAY)//设置分割线的颜色
+                            .setSelectOptions(0)//默认选中项
+                            .isRestoreItem(true)//切换时是否还原，设置默认选中第一项。
+                            .isCenterLabel(false) //是否只显示中间选中项的label文字，false则每项item全部都带有label。
+                            .setLabels("", "", "")
+                            .isDialog(true)
+                            .setBgColor(0xFFFFFFFF) //设置外部遮罩颜色
+                            .build();
+                    pvStorageOut.setPicker(storages);//一级选择器
+                    setDialog(pvStorageOut);
+                    pvStorageIn.show();
+                }
+            });
+        }
+    }
+
+    private void initStoragePickIn(boolean isBerch) {
+        if (storages.size() > 0) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    pvStorageIn = new OptionsPickerBuilder(ExchangeActivity.this, new OnOptionsSelectListener() {
+                        @Override
+                        public void onOptionsSelect(int options1, int options2, int options3, View v) {
+                            if (storageIdIn != storages.get(options1).getIBscDataStockMRecNo()) {
+                                storageIdIn = storages.get(options1).getIBscDataStockMRecNo();
+                                tiStorageIn.setContent(storages.get(options1).getSStockName());
+                                setBerch(storages.get(options1).getBerChes());
+                            }
+                        }
+                    })
+                            .setTitleText("调入仓库选择")
+                            .setContentTextSize(18)//设置滚轮文字大小
+                            .setDividerColor(Color.LTGRAY)//设置分割线的颜色
+                            .setSelectOptions(0)//默认选中项
+                            .isRestoreItem(true)//切换时是否还原，设置默认选中第一项。
+                            .isCenterLabel(false) //是否只显示中间选中项的label文字，false则每项item全部都带有label。
+                            .setLabels("", "", "")
+                            .isDialog(true)
+                            .setBgColor(0xFFFFFFFF) //设置外部遮罩颜色
+                            .build();
+                    pvStorageIn.setPicker(storages);//一级选择器
+                    setDialog(pvStorageIn);
+                    if (storageIdIn != 0 && isBerch) {
+                        for (int i = 0; i < storages.size(); i++) {
+                            if (storages.get(i).getIBscDataStockMRecNo() == storageIdIn) {
+                                setBerch(storages.get(i).getBerChes());
+                                pvBerch.show();
+                            }
+                        }
+                    } else {
+                        pvStorageIn.show();
+                    }
+                }
+            });
+        }
+    }
+
+    private void setBerch(List<Storage.BerCh> berChes) {
+        if (pvBerch != null)
+            clearBerch();
+        if (berChes.size() > 0) {
+            this.berChes.addAll(berChes);
+            initBerchPick();
+            tiPos.setVisibility(View.VISIBLE);
+        } else {
+            tiPos.setVisibility(View.GONE);
+        }
+    }
+
+    private void clearBerch() {
+        tiPos.setTitle("");
+        berchId = 0;
+        berChes.clear();
+        pvBerch = null;
+    }
+
+    private void initBerchPick() {
+        pvBerch = new OptionsPickerBuilder(ExchangeActivity.this, new OnOptionsSelectListener() {
+            @Override
+            public void onOptionsSelect(int options1, int options2, int options3, View v) {
+                if (berchId != berChes.get(options1).getId()) {
+                    berchId = berChes.get(options1).getId();
+                    tiPos.setContent(berChes.get(options1).getName());
+                }
+            }
+        })
+                .setTitleText("仓位选择")
+                .setContentTextSize(18)//设置滚轮文字大小
+                .setDividerColor(Color.LTGRAY)//设置分割线的颜色
+                .setSelectOptions(0)//默认选中项
+                .isRestoreItem(true)//切换时是否还原，设置默认选中第一项。
+                .isCenterLabel(false) //是否只显示中间选中项的label文字，false则每项item全部都带有label。
+                .setLabels("", "", "")
+                .isDialog(true)
+                .setBgColor(0xFFFFFFFF) //设置外部遮罩颜色
+                .build();
+        pvBerch.setPicker(berChes);//一级选择器
+        setDialog(pvBerch);
+    }
+
 
     private List<NetParams> getParams() {
         List<NetParams> params = new ArrayList<>();
@@ -283,70 +482,28 @@ public class InputDetailActivity extends AppCompatActivity {
         });
     }
 
-    private void setMainData(JSONObject mainData) throws NullPointerException {
-        storageId = mainData.optInt("iBscDataStockMRecNo", 0);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                tvStorage.setText(mainData.optString("sStockName"));
-                etTray.setText(mainData.optString("sTrayCode"));
-            }
-        });
-
-    }
-
-    private void setChildData(JSONArray childData) throws NullPointerException, JSONException, Exception {
-        for (int i = 0; i < childData.length(); i++) {
-            codes.add(childData.getJSONObject(i).optString("sBarCode"));
-            if (i == 0) {
-                berchId = childData.getJSONObject(i).optInt("iBscDataStockDRecNo");
-                String berch = childData.getJSONObject(i).optString("sBerChID");
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (berchId != 0) {
-                            tvBerch.setText(berch);
-                            etBerch.setVisibility(View.VISIBLE);
-                            ivBerch.setVisibility(View.VISIBLE);
-                            tvBerch.setVisibility(View.VISIBLE);
-                        }
-                    }
-                });
-            }
-        }
-        datas.addAll(initBarcodeData(childData));
-        refreshList();
-    }
-
-    private void initBarcodeColumnsData(String data) {
-        if (StringUtil.isNotEmpty(data)) {
-            barcodeColumns.addAll(new Gson().fromJson(data, new TypeToken<List<BarcodeColumn>>() {
-            }.getType()));
-        }
-    }
-
     private void showView() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 flEmpty.setVisibility(View.GONE);
-                llStorage.setVisibility(View.VISIBLE);
-                etCode.setVisibility(View.VISIBLE);
-                etTray.setVisibility(View.VISIBLE);
+                llOne.setVisibility(View.VISIBLE);
+                tiStorageOut.setVisibility(View.VISIBLE);
+                llThree.setVisibility(View.VISIBLE);
                 rvItem.setVisibility(View.VISIBLE);
                 bottomLayout.setVisibility(View.VISIBLE);
-                tvClear.setVisibility(View.VISIBLE);
+                llTwo.setVisibility(View.VISIBLE);
             }
         });
     }
 
     private List<NetParams> getCodeParams(String s) {
         List<NetParams> params = new ArrayList<>();
-        params.add(new NetParams("otype", Otypes.GetPDAMMStockProductInBarCode));
+        params.add(new NetParams("otype", Otypes.GetPDAMMStockProductDbBarCode));
         params.add(new NetParams("userid", userid));
         params.add(new NetParams("database", companyCode));
         params.add(new NetParams("sBarCode", s));
-        params.add(new NetParams("iSDContractMRecNo", orderNo + ""));
+        params.add(new NetParams("iOutBscDataStockMRecNo", storageIdOut + ""));
         return params;
     }
 
@@ -387,6 +544,33 @@ public class InputDetailActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void setMainData(JSONObject mainData) throws NullPointerException {
+//        storageId = mainData.optInt("iBscDataStockMRecNo", 0);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+//                tvStorage.setText(mainData.optString("sStockName"));
+
+            }
+        });
+
+    }
+
+    private void setChildData(JSONArray childData) throws NullPointerException, JSONException, Exception {
+        for (int i = 0; i < childData.length(); i++) {
+            codes.add(childData.getJSONObject(i).optString("sBarCode"));
+        }
+        datas.addAll(initBarcodeData(childData));
+        refreshList();
+    }
+
+    private void initBarcodeColumnsData(String data) {
+        if (StringUtil.isNotEmpty(data)) {
+            barcodeColumns.addAll(new Gson().fromJson(data, new TypeToken<List<BarcodeColumn>>() {
+            }.getType()));
+        }
     }
 
     private List<PublicItem> initBarcodeData(JSONArray jsonArray) throws JSONException, NullPointerException, Exception {
@@ -445,7 +629,7 @@ public class InputDetailActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if (adapter == null) {
-                    adapter = new PublicAdapter(datas, InputDetailActivity.this);
+                    adapter = new PublicAdapter(datas, ExchangeActivity.this);
                     adapter.setOnItemClickListener(new OnItemClickListener() {
                         @Override
                         public void onItemClick(View view, int position) {
@@ -459,6 +643,32 @@ public class InputDetailActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+
+    @OnClick({R.id.iv_back, R.id.tv_empty, R.id.tv_delete, R.id.tv_save, R.id.tv_submit, R.id.tv_clear})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            case R.id.iv_back:
+                finish();
+                break;
+            case R.id.tv_empty:
+                break;
+            case R.id.tv_delete:
+                isDelete();
+                break;
+            case R.id.tv_save:
+                save(false);
+                break;
+            case R.id.tv_submit:
+                isSubmit();
+                break;
+            case R.id.tv_clear:
+                isClear();
+                break;
+            default:
+                break;
+        }
     }
 
     private void isRemove(int position) {
@@ -478,43 +688,30 @@ public class InputDetailActivity extends AppCompatActivity {
         removeDialog.show();
     }
 
-
-    @OnClick({R.id.iv_back, R.id.tv_storage, R.id.iv_storage, R.id.iv_berch, R.id.tv_empty, R.id.tv_delete, R.id.tv_submit, R.id.tv_save, R.id.tv_berch, R.id.tv_clear})
-    public void onViewClicked(View view) {
-        switch (view.getId()) {
-            case R.id.iv_back:
-                finish();
-                break;
-            case R.id.tv_storage:
-            case R.id.iv_storage:
-                selectStorage();
-                break;
-            case R.id.tv_berch:
-            case R.id.iv_berch:
-                if (storages.size() == 0) {
-                    getStorageData(true);
-                } else {
-                    pvBerch.show();
+    private void isDelete() {
+        if (deleteDialog == null) {
+            deleteDialog = new JudgeDialog(this, R.style.JudgeDialog, "是否删除？", new JudgeDialog.OnCloseListener() {
+                @Override
+                public void onClick(boolean confirm) {
+                    if (confirm)
+                        delete();
                 }
-                break;
-            case R.id.tv_empty:
-                getData();
-                break;
-            case R.id.tv_delete:
-                isDelete();
-                break;
-            case R.id.tv_save:
-                save(false);
-                break;
-            case R.id.tv_submit:
-                isSubmit();
-                break;
-            case R.id.tv_clear:
-                isClear();
-                break;
-            default:
-                break;
+            });
         }
+        deleteDialog.show();
+    }
+
+    private void isSubmit() {
+        if (submitDialog == null) {
+            submitDialog = new JudgeDialog(this, R.style.JudgeDialog, "是否提交？", new JudgeDialog.OnCloseListener() {
+                @Override
+                public void onClick(boolean confirm) {
+                    if (confirm)
+                        save(true);
+                }
+            });
+        }
+        submitDialog.show();
     }
 
     private void isClear() {
@@ -538,51 +735,18 @@ public class InputDetailActivity extends AppCompatActivity {
         }
     }
 
-    private void isSubmit() {
-        if (submitDialog == null) {
-            submitDialog = new JudgeDialog(this, R.style.JudgeDialog, "是否提交？", new JudgeDialog.OnCloseListener() {
-                @Override
-                public void onClick(boolean confirm) {
-                    if (confirm)
-                        save(true);
-                }
-            });
-        }
-        submitDialog.show();
-    }
-
-    private void isDelete() {
-        if (deleteDialog == null) {
-            deleteDialog = new JudgeDialog(this, R.style.JudgeDialog, "是否删除？", new JudgeDialog.OnCloseListener() {
-                @Override
-                public void onClick(boolean confirm) {
-                    if (confirm)
-                        delete();
-                }
-            });
-        }
-        deleteDialog.show();
-    }
-
-
-    private List<NetParams> submitParams() {
+    private List<NetParams> deteleParams() {
         List<NetParams> params = new ArrayList<>();
-        params.add(new NetParams("otype", Otypes.MMStockProductInMSubmit));
+        params.add(new NetParams("otype", Otypes.MMStockProductOutMDelete));
         params.add(new NetParams("userid", userid));
         params.add(new NetParams("database", companyCode));
         params.add(new NetParams("iRecNo", iRecNo + ""));
         return params;
     }
 
-    private void submit() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                LoadingFinish(null);
-                LoadingDialog.showDialogForLoading(InputDetailActivity.this);
-            }
-        });
-        new NetUtil(submitParams(), url, new ResponseListener() {
+    private void delete() {
+        LoadingDialog.showDialogForLoading(this);
+        new NetUtil(deteleParams(), url, new ResponseListener() {
             @Override
             public void onSuccess(String string) {
                 try {
@@ -596,7 +760,6 @@ public class InputDetailActivity extends AppCompatActivity {
                                 finish();
                             }
                         });
-
                     } else {
                         LoadingFinish(jsonObject.optString("message"));
                     }
@@ -622,13 +785,12 @@ public class InputDetailActivity extends AppCompatActivity {
 
     private List<NetParams> saveParams() {
         List<NetParams> params = new ArrayList<>();
-        params.add(new NetParams("otype", Otypes.MMStockProductInMSave));
+        params.add(new NetParams("otype", Otypes.MMStockProductDbMSave));
         params.add(new NetParams("userid", userid));
         params.add(new NetParams("database", companyCode));
-        params.add(new NetParams("iBscDataStockMRecNo", storageId + ""));
-        params.add(new NetParams("iBscDataStockDRecNo", berchId + ""));
-        params.add(new NetParams("iMMStockProductInMRecNo", iRecNo + ""));
-        params.add(new NetParams("sTrayCode", etTray.getText().toString()));
+        params.add(new NetParams("iInBscDataStockMRecNo", storageIdIn + ""));
+        params.add(new NetParams("iOutBscDataStockMRecNo", storageIdOut + ""));
+        params.add(new NetParams("iMMStockProductDbMRecNo", iRecNo + ""));
         params.add(new NetParams("sSaveType", dbType));
         params.add(new NetParams("sBarCodes", getBarcode()));
         return params;
@@ -637,17 +799,14 @@ public class InputDetailActivity extends AppCompatActivity {
     private String getBarcode() {
         String codes = "";
         for (String code : this.codes) {
-            if (!StringUtil.isNotEmpty(codes)) {
-                codes = codes + code;
-            } else {
-                codes = codes + "," + code;
-            }
+            codes = codes + code + "," + berchId;
         }
+//        Log.d("codes", codes);
         return codes;
     }
 
     private void save(boolean submit) {
-        if (storageId == 0) {
+        if (storageIdIn == 0 || storageIdOut == 0) {
             Toast("请选择仓库");
             return;
         }
@@ -698,18 +857,24 @@ public class InputDetailActivity extends AppCompatActivity {
         });
     }
 
-    private List<NetParams> deteleParams() {
+    private List<NetParams> submitParams() {
         List<NetParams> params = new ArrayList<>();
-        params.add(new NetParams("otype", Otypes.MMStockProductInMDelete));
+        params.add(new NetParams("otype", Otypes.MMStockProductDbMSubmit));
         params.add(new NetParams("userid", userid));
         params.add(new NetParams("database", companyCode));
         params.add(new NetParams("iRecNo", iRecNo + ""));
         return params;
     }
 
-    private void delete() {
-        LoadingDialog.showDialogForLoading(this);
-        new NetUtil(deteleParams(), url, new ResponseListener() {
+    private void submit() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                LoadingFinish(null);
+                LoadingDialog.showDialogForLoading(ExchangeActivity.this);
+            }
+        });
+        new NetUtil(submitParams(), url, new ResponseListener() {
             @Override
             public void onSuccess(String string) {
                 try {
@@ -723,6 +888,7 @@ public class InputDetailActivity extends AppCompatActivity {
                                 finish();
                             }
                         });
+
                     } else {
                         LoadingFinish(jsonObject.optString("message"));
                     }
@@ -744,151 +910,6 @@ public class InputDetailActivity extends AppCompatActivity {
                 LoadingFinish(e.getMessage());
             }
         });
-    }
-
-    private void selectStorage() {
-        if (storages.size() == 0) {
-            getStorageData(false);
-        } else {
-            pvStorage.show();
-        }
-    }
-
-    private List<NetParams> getStorageParams() {
-        List<NetParams> params = new ArrayList<>();
-        params.add(new NetParams("otype", Otypes.GetStockMD));
-        params.add(new NetParams("userid", userid));
-        params.add(new NetParams("database", companyCode));
-        return params;
-    }
-
-    private void getStorageData(boolean isBerch) {
-        LoadingDialog.showDialogForLoading(this);
-        new NetUtil(getStorageParams(), url, new ResponseListener() {
-            @Override
-            public void onSuccess(String string) {
-                try {
-                    JSONObject jsonObject = new JSONObject(string);
-                    if (jsonObject.optBoolean("success")) {
-                        storages.addAll(new Gson().fromJson(initData(jsonObject.optJSONArray("tables")), new TypeToken<List<Storage>>() {
-                        }.getType()));
-                        LoadingFinish(null);
-                        initStoragePick(isBerch);
-                    } else {
-                        LoadingFinish(jsonObject.optString("message"));
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    LoadingFinish(getString(R.string.error_json));
-                } catch (NullPointerException e) {
-                    e.printStackTrace();
-                    LoadingFinish(getString(R.string.empty_data));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    LoadingFinish(getString(R.string.error_data));
-                }
-            }
-
-            @Override
-            public void onFail(IOException e) {
-                e.printStackTrace();
-                LoadingFinish(e.getMessage());
-            }
-        });
-    }
-
-    private void initStoragePick(boolean isBerch) {
-        if (storages.size() > 0) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    pvStorage = new OptionsPickerBuilder(InputDetailActivity.this, new OnOptionsSelectListener() {
-                        @Override
-                        public void onOptionsSelect(int options1, int options2, int options3, View v) {
-                            if (storageId != storages.get(options1).getIBscDataStockMRecNo()) {
-                                storageId = storages.get(options1).getIBscDataStockMRecNo();
-                                tvStorage.setText(storages.get(options1).getSStockName());
-                                setBerch(storages.get(options1).getBerChes());
-                            }
-                        }
-                    })
-                            .setTitleText("仓库选择")
-                            .setContentTextSize(18)//设置滚轮文字大小
-                            .setDividerColor(Color.LTGRAY)//设置分割线的颜色
-                            .setSelectOptions(0)//默认选中项
-                            .isRestoreItem(true)//切换时是否还原，设置默认选中第一项。
-                            .isCenterLabel(false) //是否只显示中间选中项的label文字，false则每项item全部都带有label。
-                            .setLabels("", "", "")
-                            .isDialog(true)
-                            .setBgColor(0xFFFFFFFF) //设置外部遮罩颜色
-                            .build();
-                    pvStorage.setPicker(storages);//一级选择器
-                    setDialog(pvStorage);
-                    if (storageId != 0&&isBerch) {
-                        for (int i = 0; i < storages.size(); i++) {
-                            if (storages.get(i).getIBscDataStockMRecNo() == storageId) {
-                                setBerch(storages.get(i).getBerChes());
-                                pvBerch.show();
-                            }
-                        }
-                    } else {
-                        pvStorage.show();
-                    }
-                }
-            });
-        }
-    }
-
-    private void setBerch(List<Storage.BerCh> berChes) {
-        if (pvBerch != null)
-            clearBerch();
-        if (berChes.size() > 0) {
-            this.berChes.addAll(berChes);
-            initBerchPick();
-            etBerch.setVisibility(View.VISIBLE);
-            ivBerch.setVisibility(View.VISIBLE);
-            tvBerch.setVisibility(View.VISIBLE);
-        } else {
-            etBerch.setVisibility(View.GONE);
-            ivBerch.setVisibility(View.GONE);
-            tvBerch.setVisibility(View.GONE);
-        }
-    }
-
-    private void initBerchPick() {
-        pvBerch = new OptionsPickerBuilder(InputDetailActivity.this, new OnOptionsSelectListener() {
-            @Override
-            public void onOptionsSelect(int options1, int options2, int options3, View v) {
-                if (berchId != berChes.get(options1).getId()) {
-                    berchId = berChes.get(options1).getId();
-                    tvBerch.setText(berChes.get(options1).getName());
-                }
-            }
-        })
-                .setTitleText("仓位选择")
-                .setContentTextSize(18)//设置滚轮文字大小
-                .setDividerColor(Color.LTGRAY)//设置分割线的颜色
-                .setSelectOptions(0)//默认选中项
-                .isRestoreItem(true)//切换时是否还原，设置默认选中第一项。
-                .isCenterLabel(false) //是否只显示中间选中项的label文字，false则每项item全部都带有label。
-                .setLabels("", "", "")
-                .isDialog(true)
-                .setBgColor(0xFFFFFFFF) //设置外部遮罩颜色
-                .build();
-        pvBerch.setPicker(berChes);//一级选择器
-        setDialog(pvBerch);
-    }
-
-    private void clearBerch() {
-        etBerch.setText("");
-        tvBerch.setText("");
-        berchId = 0;
-        berChes.clear();
-        pvBerch = null;
-    }
-
-    private String initData(JSONArray jsonArray) throws NullPointerException, Exception {
-        return jsonArray.optString(0);
     }
 
     private void setDialog(OptionsPickerView pickview) {

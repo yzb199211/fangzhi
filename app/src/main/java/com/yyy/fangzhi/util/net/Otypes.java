@@ -14,4 +14,7 @@ public class Otypes {
     public static final String MMStockProductOutMDelete = "MMStockProductOutMDelete";
     public static final String MMStockProductOutMSave = "MMStockProductOutMSave";
     public static final String MMStockProductOutMSubmit = "MMStockProductOutMSubmit";
+    public static final String GetPDAMMStockProductDbBarCode = "GetPDAMMStockProductDbBarCode";
+    public static final String MMStockProductDbMSave  = "MMStockProductDbMSave ";
+    public static final String MMStockProductDbMSubmit  = "MMStockProductDbMSubmit";
 }

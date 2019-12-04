@@ -13,7 +13,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name=".output.OutputDetailInnerActivity"></activity>
+        <activity android:name=".exchange.ExchangeActivity"></activity>
+        <activity android:name=".count.CountActivity" />
+        <activity android:name=".output.OutputDetailInnerActivity" />
         <activity
             android:name=".login.LoginActivity"
             android:screenOrientation="portrait"
