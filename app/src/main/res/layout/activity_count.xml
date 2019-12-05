@@ -91,7 +91,7 @@
             android:background="@color/white"
             android:gravity="center_vertical"
             android:hint="@string/hint_code"
-            android:inputType="number"
+            android:inputType="textEmailAddress"
             android:paddingLeft="@dimen/dp_10"
             android:paddingRight="@dimen/dp_10"
             android:singleLine="true"

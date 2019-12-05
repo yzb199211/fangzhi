@@ -576,12 +576,11 @@ public class CountActivity extends AppCompatActivity {
     }
 
     private void setMainData(JSONObject mainData) throws NullPointerException {
-//        storageId = mainData.optInt("iBscDataStockMRecNo", 0);
+        storageId = mainData.optInt("iBscDataStockMRecNo", 0);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-//                tvStorage.setText(mainData.optString("sStockName"));
-
+                tiStorage.setContent(mainData.optString("sStockName"));
             }
         });
 
@@ -589,6 +588,18 @@ public class CountActivity extends AppCompatActivity {
 
     private void setChildData(JSONArray childData) throws NullPointerException, JSONException, Exception {
         for (int i = 0; i < childData.length(); i++) {
+            if (i == 0) {
+                berchId = childData.getJSONObject(i).optInt("iBscDataStockDRecNo");
+                String berch = childData.getJSONObject(i).optString("sBerChID");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (berchId != 0) {
+                            tiPos.setContent(berch);
+                        }
+                    }
+                });
+            }
             codes.add(childData.getJSONObject(i).optString("sBarCode"));
         }
         datas.addAll(initBarcodeData(childData));
@@ -771,7 +782,7 @@ public class CountActivity extends AppCompatActivity {
         for (PublicItem code : datas) {
             codes = codes + code.getCountCode().toString() + "," + berchId + ";";
         }
-        Log.d("codes", codes);
+//        Log.d("codes", codes);
         return codes;
     }
 
@@ -829,7 +840,7 @@ public class CountActivity extends AppCompatActivity {
 
     private List<NetParams> submitParams() {
         List<NetParams> params = new ArrayList<>();
-        params.add(new NetParams("otype", Otypes.MMStockProductDbMSubmit));
+        params.add(new NetParams("otype", Otypes.MMStockProductCheckMSubmit));
         params.add(new NetParams("userid", userid));
         params.add(new NetParams("database", companyCode));
         params.add(new NetParams("iRecNo", iRecNo + ""));
