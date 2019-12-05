@@ -29,6 +29,8 @@
         android:id="@+id/ti_storage_out"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_40"
+        android:paddingLeft="@dimen/dp_10"
+        android:paddingRight="@dimen/dp_10"
         android:visibility="gone" />
 
     <LinearLayout
@@ -37,6 +39,8 @@
         android:layout_height="@dimen/dp_40"
         android:layout_marginTop="@dimen/dp_1"
         android:orientation="horizontal"
+        android:paddingLeft="@dimen/dp_10"
+        android:paddingRight="@dimen/dp_10"
         android:visibility="gone">
 
         <com.yyy.fangzhi.view.TextItem
@@ -52,6 +56,7 @@
             android:layout_marginLeft="@dimen/dp_1"
             android:layout_weight="1" />
     </LinearLayout>
+
     <LinearLayout
         android:id="@+id/ll_two"
         android:layout_width="match_parent"
@@ -76,6 +81,7 @@
             android:layout_marginLeft="@dimen/dp_1"
             android:layout_weight="1" />
     </LinearLayout>
+
     <LinearLayout
         android:id="@+id/ll_three"
         android:layout_width="match_parent"
@@ -98,8 +104,7 @@
             android:paddingRight="@dimen/dp_10"
             android:singleLine="true"
             android:textColor="@color/default_content_color"
-            android:textSize="@dimen/sp_14"
-            />
+            android:textSize="@dimen/sp_14" />
 
         <TextView
             android:id="@+id/tv_clear"
@@ -112,8 +117,7 @@
             android:paddingRight="@dimen/dp_10"
             android:text="清空"
             android:textColor="@color/red"
-            android:textSize="@dimen/sp_14"
-           />
+            android:textSize="@dimen/sp_14" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

@@ -3,6 +3,7 @@ package com.yyy.fangzhi.count;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -165,17 +166,29 @@ public class CountActivity extends AppCompatActivity {
     }
 
     private void initView() {
+        initVisiable();
+        initViewState();
+        initRecycle();
+        setCodeListener();
+        setSelectListener();
+    }
+
+    private void initVisiable() {
         if (iRecNo == 0) {
             tvDelete.setVisibility(View.INVISIBLE);
         }
         ivRight.setVisibility(View.GONE);
         tvTitle.setText(title);
         bottomLayout.setVisibility(View.GONE);
+    }
+
+    private void initViewState() {
         tiStorage.setTitle(getString(R.string.item_storage_in));
+        tiStorage.setContentBlack();
+        tiStorage.setTitleMargin(0, 0, getResources().getDimensionPixelOffset(R.dimen.dp_10), 0);
         tiPos.setTitle(getString(R.string.item_berch));
-        initRecycle();
-        setCodeListener();
-        setSelectListener();
+        tiPos.setContentBlack();
+        tiPos.setTitleMargin(0, 0, getResources().getDimensionPixelOffset(R.dimen.dp_10), 0);
     }
 
     private void showView() {
@@ -237,6 +250,10 @@ public class CountActivity extends AppCompatActivity {
         tiPos.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
+                if (storageId == 0) {
+                    Toast("请选择仓库");
+                    return;
+                }
                 if (storages.size() == 0) {
                     getStorageData(true);
                 } else {
@@ -309,6 +326,11 @@ public class CountActivity extends AppCompatActivity {
     }
 
     private void getCodeData(String s) {
+        if (storageId == 0) {
+            Toast("请选择仓库");
+            return;
+        }
+        Log.e("storage", storageId + "");
         new NetUtil(getCodeParams(s), url, new ResponseListener() {
             @Override
             public void onSuccess(String string) {
@@ -367,7 +389,6 @@ public class CountActivity extends AppCompatActivity {
                         }.getType()));
                         LoadingFinish(null);
                         initStoragePickIn(isBerch);
-
                     } else {
                         LoadingFinish(jsonObject.optString("message"));
                     }
@@ -492,8 +513,21 @@ public class CountActivity extends AppCompatActivity {
 
     private PublicItem getBarcodeItem(JSONObject jsonObject) throws JSONException, NullPointerException, Exception {
         PublicItem item = new PublicItem();
+        PublicItem.CountCode code = new PublicItem.CountCode();
         List<ConfigureInfo> list = new ArrayList<>();
         for (BarcodeColumn column : barcodeColumns) {
+            if (column.getSFieldsName().equals("sBarCode")) {
+                Log.e("sBarCode", jsonObject.optString(column.getSFieldsName()) + "");
+                code.setCode(jsonObject.optString(column.getSFieldsName()));
+            }
+            if (column.getSFieldsName().equals("sTrayCode")) {
+                Log.e("sTrayCode", jsonObject.optString(column.getSFieldsName()) + "");
+                code.setTray(jsonObject.optString(column.getSFieldsName()));
+            }
+            if (column.getSFieldsName().equals("fQty")) {
+
+                code.setQty(StringUtil.stringTOdouble(jsonObject.optString(column.getSFieldsName())));
+            }
             if (column.getIHide() == 0) {
                 ConfigureInfo info = new ConfigureInfo();
                 info.setSingleLine(true);
@@ -512,6 +546,7 @@ public class CountActivity extends AppCompatActivity {
                 list.add(info);
             }
         }
+        item.setCountCode(code);
         item.setList(list);
         item.setId(jsonObject.optInt("iRecNo", 0));
         return item;
@@ -721,7 +756,7 @@ public class CountActivity extends AppCompatActivity {
 
     private List<NetParams> saveParams() {
         List<NetParams> params = new ArrayList<>();
-        params.add(new NetParams("otype", Otypes.MMStockProductDbMSave));
+        params.add(new NetParams("otype", Otypes.MMStockProductCheckMSave));
         params.add(new NetParams("userid", userid));
         params.add(new NetParams("database", companyCode));
         params.add(new NetParams("iBscDataStockMRecNo", storageId + ""));
@@ -736,7 +771,7 @@ public class CountActivity extends AppCompatActivity {
         for (PublicItem code : datas) {
             codes = codes + code.getCountCode().toString() + "," + berchId + ";";
         }
-//        Log.d("codes", codes);
+        Log.d("codes", codes);
         return codes;
     }
 

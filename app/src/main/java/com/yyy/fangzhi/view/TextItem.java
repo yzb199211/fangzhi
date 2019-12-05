@@ -5,6 +5,7 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -22,9 +23,11 @@ public class TextItem extends LinearLayout {
     TextView tvContent;
     TextView tvTitle;
     OnItemClickListener onItemClickListener;
+    LinearLayout.LayoutParams params;
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
+        setContentPadding();
     }
 
     public TextItem setTitle(String title) {
@@ -47,8 +50,24 @@ public class TextItem extends LinearLayout {
         return this;
     }
 
+    public TextItem setTitleMargin(int left, int top, int right, int bottom) {
+        params.setMargins(left, top, right, bottom);
+        tvTitle.setLayoutParams(params);
+        return this;
+    }
+
+    public TextItem setContentBlack() {
+        tvContent.setTextColor(context.getResources().getColor(R.color.default_text_color));
+        return this;
+    }
+
     public String getTitle() {
         return tvTitle.getText().toString();
+    }
+
+    public TextItem setContentPadding() {
+        tvContent.setPadding(0, context.getResources().getDimensionPixelOffset(R.dimen.dp_10), 0, context.getResources().getDimensionPixelOffset(R.dimen.dp_10));
+        return this;
     }
 
     public TextItem(@NonNull Context context) {
@@ -66,6 +85,7 @@ public class TextItem extends LinearLayout {
     }
 
     private void init() {
+        params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         tvTitle = findViewById(R.id.tv_title);
         tvContent = findViewById(R.id.tv_content);
         tvContent.setOnClickListener(new OnClickListener() {

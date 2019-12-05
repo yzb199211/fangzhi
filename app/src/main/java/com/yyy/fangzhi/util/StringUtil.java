@@ -34,6 +34,14 @@ public class StringUtil {
         return pattern.matcher(str).matches();
     }
 
+    public static double stringTOdouble(String s) {
+        try {
+            return Double.parseDouble(s);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
     /**
      * 判断颜色是否正确
      *

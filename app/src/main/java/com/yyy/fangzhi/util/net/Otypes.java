@@ -15,8 +15,10 @@ public class Otypes {
     public static final String MMStockProductOutMSave = "MMStockProductOutMSave";
     public static final String MMStockProductOutMSubmit = "MMStockProductOutMSubmit";
     public static final String GetPDAMMStockProductDbBarCode = "GetPDAMMStockProductDbBarCode";
-    public static final String MMStockProductDbMSave  = "MMStockProductDbMSave ";
+    public static final String MMStockProductDbMSave  = "MMStockProductDbMSave";
     public static final String MMStockProductDbMSubmit  = "MMStockProductDbMSubmit";
     public static final String GetPDAMMStockProductCheckBarCode  = "GetPDAMMStockProductCheckBarCode";
     public static final String MMStockProductCheckMDelete  = "MMStockProductCheckMDelete";
+    public static final String MMStockProductCheckMSave  = "MMStockProductCheckMSave";
+    public static final String MMStockProductCheckMSubmit  = "MMStockProductCheckMSubmit";
 }

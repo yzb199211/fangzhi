@@ -172,18 +172,32 @@ public class ExchangeActivity extends AppCompatActivity {
     }
 
     private void initView() {
+        initVisiable();
+        initViewState();
+        initRecycle();
+        setCodeListener();
+        setSelectListener();
+    }
+
+    private void initVisiable() {
         if (iRecNo == 0) {
             tvDelete.setVisibility(View.INVISIBLE);
         }
         ivRight.setVisibility(View.GONE);
         tvTitle.setText(title);
         bottomLayout.setVisibility(View.GONE);
+    }
+
+    private void initViewState() {
         tiStorageIn.setTitle(getString(R.string.item_storage_in));
+        tiStorageIn.setContentBlack();
+        tiStorageIn.setTitleMargin(0, 0, getResources().getDimensionPixelOffset(R.dimen.dp_10), 0);
         tiStorageOut.setTitle(getString(R.string.item_storage_out));
+        tiStorageOut.setContentBlack();
+        tiStorageOut.setTitleMargin(0, 0, getResources().getDimensionPixelOffset(R.dimen.dp_10), 0);
         tiPos.setTitle(getString(R.string.item_berch_in));
-        initRecycle();
-        setCodeListener();
-        setSelectListener();
+        tiPos.setContentBlack();
+        tiPos.setTitleMargin(0, 0, getResources().getDimensionPixelOffset(R.dimen.dp_10), 0);
     }
 
     private void setSelectListener() {
@@ -199,6 +213,8 @@ public class ExchangeActivity extends AppCompatActivity {
                 if (storages.size() == 0) {
                     getStorageData(1, false);
                 } else {
+                    if (pvStorageOut == null)
+                        initStoragePickOut();
                     pvStorageOut.show();
                 }
             }
@@ -219,16 +235,42 @@ public class ExchangeActivity extends AppCompatActivity {
     }
 
     private void setBerchInListener() {
+
         tiPos.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
+                if (storageIdIn == 0) {
+                    Toast("请选择调入仓库");
+                    return;
+                }
                 if (storages.size() == 0) {
                     getStorageData(2, true);
+                } else if (berChes.size() == 0) {
+                    List list = findBerches();
+                    if (list != null && list.size() > 0) {
+                        setBerch(berChes);
+                        pvBerch.show();
+                    } else {
+                        Toast("该仓库无仓位");
+                    }
                 } else {
                     pvBerch.show();
                 }
             }
         });
+    }
+
+    private List<Storage.BerCh> findBerches() {
+        return findBerchesPos() == -1 ? null : storages.get(findBerchesPos()).getBerChes();
+    }
+
+    private int findBerchesPos() {
+        for (int i = 0; i < storages.size(); i++) {
+            if (storages.get(i).getIBscDataStockMRecNo() == storageIdIn) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private void initRecycle() {
@@ -244,6 +286,10 @@ public class ExchangeActivity extends AppCompatActivity {
                 KeyBoardUtil.hideInput(ExchangeActivity.this);
                 String code = etCode.getText().toString();
                 etCode.setText("");
+                if (storageIdOut == 0) {
+                    Toast("请选择调出仓库");
+                    return;
+                }
                 if (codes.contains(code)) {
                     Toast(getString(R.string.repeat_code));
                     return;
@@ -551,7 +597,6 @@ public class ExchangeActivity extends AppCompatActivity {
             @Override
             public void run() {
 //                tvStorage.setText(mainData.optString("sStockName"));
-
             }
         });
 

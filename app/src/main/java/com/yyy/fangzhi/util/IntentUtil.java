@@ -5,9 +5,12 @@ import android.content.Intent;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.yyy.fangzhi.count.CountActivity;
+import com.yyy.fangzhi.exchange.ExchangeActivity;
 import com.yyy.fangzhi.input.InputDetailActivity;
 import com.yyy.fangzhi.output.NoticeSelectActivity;
 import com.yyy.fangzhi.output.OutputDetailActivity;
+import com.yyy.fangzhi.output.OutputDetailInnerActivity;
 
 public class IntentUtil {
     public static void goActivity(AppCompatActivity activity, int formId) {
@@ -22,6 +25,15 @@ public class IntentUtil {
                 return intent;
             case 24:
                 intent.setClass(context, OutputDetailActivity.class);
+                return intent;
+            case 25:
+                intent.setClass(context, OutputDetailInnerActivity.class);
+                return intent;
+            case 26:
+                intent.setClass(context, ExchangeActivity.class);
+                return intent;
+            case 23:
+                intent.setClass(context, CountActivity.class);
                 return intent;
         }
         return null;

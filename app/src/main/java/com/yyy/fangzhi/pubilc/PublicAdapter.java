@@ -1,6 +1,7 @@
 package com.yyy.fangzhi.pubilc;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -46,6 +47,7 @@ public class PublicAdapter extends RecyclerView.Adapter<PublicAdapter.VH> {
 
     @Override
     public int getItemCount() {
+//        Log.e("size", list.size() + "");
         return list.size();
     }
 

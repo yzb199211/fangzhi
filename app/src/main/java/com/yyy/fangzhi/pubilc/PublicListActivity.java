@@ -63,7 +63,7 @@ public class PublicListActivity extends AppCompatActivity {
     String companyCode;
 
     int formid;
-    String title;
+    String title = "";
 
     SharedPreferencesHelper preferencesHelper;
 
@@ -135,6 +135,7 @@ public class PublicListActivity extends AppCompatActivity {
                 try {
                     JSONObject jsonObject = new JSONObject(string);
                     if (jsonObject.optBoolean("success")) {
+                        reportColumns.clear();
                         reportColumns.addAll(getInfo(jsonObject.optJSONObject("info").optString("ReportColumns2")));
                         initData(jsonObject.optJSONArray("data"));
                         LoadingFinish(null);
@@ -227,6 +228,8 @@ public class PublicListActivity extends AppCompatActivity {
             public void run() {
                 if (adapter == null) {
                     initAdapter();
+                } else {
+                    adapter.notifyDataSetChanged();
                 }
             }
         });
@@ -292,9 +295,11 @@ public class PublicListActivity extends AppCompatActivity {
                     removeData(position);
                 }
             }
-        } else if (requestCode == ResultCode.RefreshCode) {
-            datas.clear();
-            adapter.notifyDataSetChanged();
+        } else if (resultCode == ResultCode.RefreshCode) {
+            if (datas.size() > 0) {
+                datas.clear();
+                adapter.notifyDataSetChanged();
+            }
             getData();
         }
     }
