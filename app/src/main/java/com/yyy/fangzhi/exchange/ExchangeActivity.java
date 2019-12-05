@@ -161,7 +161,6 @@ public class ExchangeActivity extends AppCompatActivity {
         address = (String) preferencesHelper.getSharedPreference("address", "");
         companyCode = (String) preferencesHelper.getSharedPreference("companyCode", "");
         url = address + NetConfig.server + NetConfig.PDAHandler;
-        ;
     }
 
     private void getIntentData() {
@@ -213,7 +212,7 @@ public class ExchangeActivity extends AppCompatActivity {
                 if (storages.size() == 0) {
                     getStorageData(2, false);
                 } else {
-                    pvStorageOut.show();
+                    pvStorageIn.show();
                 }
             }
         });
@@ -339,7 +338,7 @@ public class ExchangeActivity extends AppCompatActivity {
                             .build();
                     pvStorageOut.setPicker(storages);//一级选择器
                     setDialog(pvStorageOut);
-                    pvStorageIn.show();
+                    pvStorageOut.show();
                 }
             });
         }
@@ -799,7 +798,7 @@ public class ExchangeActivity extends AppCompatActivity {
     private String getBarcode() {
         String codes = "";
         for (String code : this.codes) {
-            codes = codes + code + "," + berchId;
+            codes = codes + code + "," + berchId + ";";
         }
 //        Log.d("codes", codes);
         return codes;

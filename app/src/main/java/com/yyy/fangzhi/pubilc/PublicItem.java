@@ -9,9 +9,18 @@ public class PublicItem {
     int id;
     String Code;
     OutCode outCode;
+    CountCode CountCode;
     int trayPos;
     int qtyPos;
     int qtyFlawPos;
+
+    public void setCountCode(PublicItem.CountCode countCode) {
+        CountCode = countCode;
+    }
+
+    public PublicItem.CountCode getCountCode() {
+        return CountCode;
+    }
 
     public int getTrayPos() {
         return trayPos;
@@ -79,6 +88,40 @@ public class PublicItem {
 
     public void setFlawQty(double flawQty) {
         list.get(qtyFlawPos).setContent(flawQty + "");
+    }
+
+    public static class CountCode {
+        private String code;
+        private String tray;
+        private double qty;
+
+        public String getCode() {
+            return code;
+        }
+
+        public void setCode(String code) {
+            this.code = code;
+        }
+
+        public String getTray() {
+            return tray;
+        }
+
+        public void setTray(String tray) {
+            this.tray = tray;
+        }
+
+        public double getQty() {
+            return qty;
+        }
+
+        public void setQty(double qty) {
+            this.qty = qty;
+        }
+
+        public String toString() {
+            return code + "," + tray + "," + qty;
+        }
     }
 
     public static class OutCode {

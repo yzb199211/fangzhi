@@ -41,6 +41,8 @@
     <string name="title_notice">发货通知单</string>
     <string name="title_menu">常用功能</string>
 
+    <string name="item_storage">仓库</string>
+    <string name="item_berch">仓位</string>
     <string name="item_storage_in">调入仓库</string>
     <string name="item_berch_in">调入仓位</string>
     <string name="item_storage_out">调出仓库</string>

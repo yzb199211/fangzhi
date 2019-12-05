@@ -34,7 +34,7 @@
         android:visibility="gone">
 
         <com.yyy.fangzhi.view.TextItem
-            android:id="@+id/ti_storage_in"
+            android:id="@+id/ti_storage"
             android:layout_width="@dimen/dp_0"
             android:layout_height="match_parent"
             android:layout_weight="1" />
