@@ -26,6 +26,7 @@ import com.yyy.fangzhi.dialog.JudgeDialog;
 import com.yyy.fangzhi.dialog.LoadingDialog;
 import com.yyy.fangzhi.interfaces.OnEntryListener;
 import com.yyy.fangzhi.interfaces.OnItemClickListener;
+import com.yyy.fangzhi.interfaces.OnItemLongClickListener;
 import com.yyy.fangzhi.interfaces.ResponseListener;
 import com.yyy.fangzhi.model.BarcodeColumn;
 import com.yyy.fangzhi.pubilc.DataFormat;
@@ -111,7 +112,12 @@ public class OutputDetailFragment extends Fragment {
     LinearLayout llSix;
     @BindView(R.id.scroll)
     NestedScrollView scrollView;
-
+    @BindView(R.id.it_qty)
+    TextItem itQty;
+    @BindView(R.id.it_num)
+    TextItem itNum;
+    @BindView(R.id.et_cut)
+    EditListenerView etCut;
 
     private OnResultListener mListener;
     Unbinder unbinder;
@@ -136,6 +142,9 @@ public class OutputDetailFragment extends Fragment {
     private int customerId = 0;
     private int noticeId = 0;
     private int storageId = 0;
+    int totalNum;
+
+    double totalLength;
 
     private boolean canDelete;
 
@@ -237,10 +246,15 @@ public class OutputDetailFragment extends Fragment {
 
     private void initView() {
         bottomLayout.setVisibility(View.GONE);
-        svRed.setChecked(iRed == 0 ? false : true);
-
+        setViewState();
         initRecycle();
         setCodeListener();
+    }
+
+    private void setViewState() {
+        svRed.setChecked(iRed == 0 ? false : true);
+        itNum.setTitle("总卷数：");
+        itQty.setTitle("总米数：");
     }
 
     private void setViewData() {
@@ -252,6 +266,9 @@ public class OutputDetailFragment extends Fragment {
                 itDate.setContent(date).setContentColor(getActivity().getResources().getColor(R.color.default_content_color)).setTitle("日期：");
                 itCus.setContent(customerName).setContentColor(getActivity().getResources().getColor(R.color.default_content_color)).setTitle("客户：");
                 itWorker.setContent(workerName).setContentColor(getActivity().getResources().getColor(R.color.default_content_color)).setTitle("下单：");
+                if (iCut == 1) {
+                    llSix.setVisibility(View.VISIBLE);
+                }
                 if (!canDelete)
                     tvDelete.setVisibility(View.INVISIBLE);
             }
@@ -292,8 +309,8 @@ public class OutputDetailFragment extends Fragment {
         params.add(new NetParams("iSDSendMRecNo", noticeId + ""));
         params.add(new NetParams("iBscDataCustomerRecNo", customerId + ""));
         params.add(new NetParams("iBscDataMatRecNo", 0 + ""));
-        params.add(new NetParams("iRed", iCut + ""));
-        params.add(new NetParams("fCutQty", 0 + ""));
+        params.add(new NetParams("iRed", iRed + ""));
+        params.add(new NetParams("fCutQty", StringUtil.stringTOdouble(etCut.getText().toString()) + ""));
         return params;
     }
 
@@ -500,10 +517,15 @@ public class OutputDetailFragment extends Fragment {
 //        for (BarcodeColumn column : barcodeColumns) {
         for (int i = 0; i < barcodeColumns.size(); i++) {
             BarcodeColumn column = barcodeColumns.get(i);
+            if (column.getSFieldsName().equals("iQty")) {
+                item.setCount(StringUtil.stringTOint(jsonObject.optString(column.getSFieldsName())));
+            }
             if (column.getSFieldsName().equals("sTrayCode"))
                 item.setTrayPos(i);
-            if (column.getSFieldsName().equals("fQty"))
+            if (column.getSFieldsName().equals("fQty")) {
                 item.setQtyPos(i);
+                item.setFQty(StringUtil.stringTOdouble(jsonObject.optString(column.getSFieldsName())));
+            }
             if (column.getSFieldsName().equals("fFlawQty"))
                 item.setQtyFlawPos(i);
             if (column.getIHide() == 0) {
@@ -570,13 +592,35 @@ public class OutputDetailFragment extends Fragment {
 
                         }
                     });
+                    adapter.setOnItemLongClickListener(new OnItemLongClickListener() {
+                        @Override
+                        public void itemLongClick(View v, int pos) {
+                            isRemove(pos);
+                        }
+                    });
                     rvItem.setAdapter(adapter);
                 } else {
                     adapter.notifyDataSetChanged();
                 }
+                setTotal();
             }
         });
 
+    }
+
+    private void setTotal() {
+        getTotal();
+        itQty.setContent(totalLength + "");
+        itNum.setContent(totalNum + "");
+    }
+
+    private void getTotal() {
+        totalNum = 0;
+        totalLength = 0;
+        for (PublicItem item : datas) {
+            totalNum = totalNum + item.getCount();
+            totalLength = totalLength + item.getFQty();
+        }
     }
 
     private void editCode(int position) {
@@ -584,7 +628,6 @@ public class OutputDetailFragment extends Fragment {
         intent.putExtra("pos", position);
         intent.putExtra("data", new Gson().toJson(datas.get(position).getOutCode()));
         intent.setClass(getActivity(), OutputEditDialog.class);
-//        intent.addFlags( Intent.FLAG_ACTIVITY_NO_ANIMATION );
         startActivityForResult(intent, 1);
     }
 
@@ -598,7 +641,7 @@ public class OutputDetailFragment extends Fragment {
                 if (confirm) {
                     codes.remove(position);
                     datas.remove(position);
-                    adapter.notifyDataSetChanged();
+                    refreshList();
                 }
             }
         });
@@ -617,6 +660,7 @@ public class OutputDetailFragment extends Fragment {
                 bottomLayout.setVisibility(View.VISIBLE);
                 flEmpty.setVisibility(View.GONE);
                 scrollView.setVisibility(View.VISIBLE);
+                llFive.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -983,6 +1027,7 @@ public class OutputDetailFragment extends Fragment {
         datas.get(pos).setQty(code.getOutQty());
         datas.get(pos).setFlawQty(code.getFlawQty());
         datas.get(pos).setTray(code.getTray());
+        datas.get(pos).setFQty(code.getOutQty());
         refreshList();
     }
 }

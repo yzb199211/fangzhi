@@ -73,6 +73,7 @@
     <string name="hint_tray"> 请输入托盘号</string>
     <string name="hint_code"> 请输入条码</string>
     <string name="hint_notice"> 请输入通知单号</string>
+    <string name="hint_cut"> 请输入修剪米数</string>
 
     <string name="error_berch">无此仓位</string>
 
