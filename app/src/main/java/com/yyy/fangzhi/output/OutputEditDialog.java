@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import com.yyy.fangzhi.R;
 import com.yyy.fangzhi.dialog.JudgeDialog;
 import com.yyy.fangzhi.pubilc.PublicItem;
+import com.yyy.fangzhi.util.IntentCode;
 import com.yyy.fangzhi.util.StringUtil;
 
 import butterknife.BindView;
@@ -30,6 +31,8 @@ public class OutputEditDialog extends AppCompatActivity {
     EditText etQtyOut;
     @BindView(R.id.et_qty_flaw)
     EditText etQtyFlaw;
+    @BindView(R.id.tv_qty_flaw)
+    TextView tvQtyFlaw;
     @BindView(R.id.et_tray)
     EditText etTray;
     @BindView(R.id.ll_tray)
@@ -41,6 +44,7 @@ public class OutputEditDialog extends AppCompatActivity {
     double qtyFlaw;
 
     int pos;
+    int intentCode;
 
     JudgeDialog editDialog;
 
@@ -59,6 +63,7 @@ public class OutputEditDialog extends AppCompatActivity {
 
     private void getIntentData() {
         pos = getIntent().getIntExtra("pos", 1);
+        intentCode = getIntent().getIntExtra("code", 0);
         getCode(new Gson().fromJson(getIntent().getStringExtra("data"), PublicItem.OutCode.class));
     }
 
@@ -74,6 +79,21 @@ public class OutputEditDialog extends AppCompatActivity {
         etQtyOut.setText(qtyOut + "");
         etQtyFlaw.setText(qtyFlaw + "");
         etTray.setText(tray);
+        setViewVisiable();
+    }
+
+    private void setViewVisiable() {
+        switch (intentCode) {
+            case IntentCode.OutputCode:
+                llTray.setVisibility(View.VISIBLE);
+                break;
+            case IntentCode.CountCode:
+                etQtyFlaw.setVisibility(View.GONE);
+                tvQtyFlaw.setVisibility(View.GONE);
+                break;
+            default:
+                break;
+        }
     }
 
     @OnClick({R.id.tv_delete, R.id.tv_submit})

@@ -51,6 +51,7 @@
             android:textSize="@dimen/sp_14" />
 
         <TextView
+            android:id="@+id/tv_qty_flaw"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginLeft="@dimen/dp_1"
@@ -90,7 +91,7 @@
             android:background="@color/white"
             android:gravity="center_vertical"
             android:paddingLeft="@dimen/dp_10"
-            android:text="@string/qty_out"
+            android:text="@string/qty_tray"
             android:textColor="@color/default_text_color"
             android:textSize="@dimen/sp_14" />
 

@@ -32,6 +32,7 @@ import com.yyy.fangzhi.model.BarcodeColumn;
 import com.yyy.fangzhi.pubilc.DataFormat;
 import com.yyy.fangzhi.pubilc.PublicAdapter;
 import com.yyy.fangzhi.pubilc.PublicItem;
+import com.yyy.fangzhi.util.IntentCode;
 import com.yyy.fangzhi.util.KeyBoardUtil;
 import com.yyy.fangzhi.util.SharedPreferencesHelper;
 import com.yyy.fangzhi.util.StringUtil;
@@ -627,6 +628,7 @@ public class OutputDetailFragment extends Fragment {
         Intent intent = new Intent();
         intent.putExtra("pos", position);
         intent.putExtra("data", new Gson().toJson(datas.get(position).getOutCode()));
+        intent.putExtra("code", IntentCode.OutputCode);
         intent.setClass(getActivity(), OutputEditDialog.class);
         startActivityForResult(intent, 1);
     }

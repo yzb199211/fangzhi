@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,12 +28,15 @@ import com.yyy.fangzhi.exchange.ExchangeActivity;
 import com.yyy.fangzhi.interfaces.OnClickListener2;
 import com.yyy.fangzhi.interfaces.OnEntryListener;
 import com.yyy.fangzhi.interfaces.OnItemClickListener;
+import com.yyy.fangzhi.interfaces.OnItemLongClickListener;
 import com.yyy.fangzhi.interfaces.ResponseListener;
 import com.yyy.fangzhi.model.BarcodeColumn;
 import com.yyy.fangzhi.model.Storage;
+import com.yyy.fangzhi.output.OutputEditDialog;
 import com.yyy.fangzhi.pubilc.DataFormat;
 import com.yyy.fangzhi.pubilc.PublicAdapter;
 import com.yyy.fangzhi.pubilc.PublicItem;
+import com.yyy.fangzhi.util.IntentCode;
 import com.yyy.fangzhi.util.KeyBoardUtil;
 import com.yyy.fangzhi.util.SharedPreferencesHelper;
 import com.yyy.fangzhi.util.StringUtil;
@@ -62,6 +66,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static com.yyy.fangzhi.util.ResultCode.DeleteCode;
+import static com.yyy.fangzhi.util.ResultCode.EditCode;
 import static com.yyy.fangzhi.util.ResultCode.RefreshCode;
 
 public class CountActivity extends AppCompatActivity {
@@ -625,6 +630,12 @@ public class CountActivity extends AppCompatActivity {
                     adapter.setOnItemClickListener(new OnItemClickListener() {
                         @Override
                         public void onItemClick(View view, int position) {
+                            editCode(position);
+                        }
+                    });
+                    adapter.setOnItemLongClickListener(new OnItemLongClickListener() {
+                        @Override
+                        public void itemLongClick(View v, int pos) {
                             isRemove(position);
                         }
                     });
@@ -636,6 +647,15 @@ public class CountActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void editCode(int position) {
+        Intent intent = new Intent();
+        intent.putExtra("pos", position);
+        intent.putExtra("data", new Gson().toJson(datas.get(position).getOutCode()));
+        intent.putExtra("code", IntentCode.CountCode);
+        intent.setClass(this, OutputEditDialog.class);
+        startActivityForResult(intent, 1);
     }
 
     private void setTotal() {
@@ -651,6 +671,23 @@ public class CountActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (data != null&&resultCode==EditCode) {
+            initResultEdit(data);
+        }
+    }
+    private void initResultEdit(Intent data) {
+        int pos = data.getIntExtra("pos", 0);
+        PublicItem.OutCode code = new Gson().fromJson(data.getStringExtra("code"), PublicItem.OutCode.class);
+        datas.get(pos).getCountCode().setTray(code.getTray());
+        datas.get(pos).getCountCode().setQty(code.getOutQty());
+        datas.get(pos).setQty(code.getOutQty());
+        datas.get(pos).setTray(code.getTray());
+        datas.get(pos).setFQty(code.getOutQty());
+        refreshList();
+    }
     @OnClick({R.id.iv_back, R.id.tv_empty, R.id.tv_clear, R.id.tv_delete, R.id.tv_save, R.id.tv_submit})
     public void onViewClicked(View view) {
         switch (view.getId()) {

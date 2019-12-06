@@ -38,6 +38,7 @@ import com.yyy.fangzhi.model.Storage;
 import com.yyy.fangzhi.pubilc.DataFormat;
 import com.yyy.fangzhi.pubilc.PublicAdapter;
 import com.yyy.fangzhi.pubilc.PublicItem;
+import com.yyy.fangzhi.util.IntentCode;
 import com.yyy.fangzhi.util.KeyBoardUtil;
 import com.yyy.fangzhi.util.SharedPreferencesHelper;
 import com.yyy.fangzhi.util.StringUtil;
@@ -784,6 +785,7 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
     private void editCode(int position) {
         Intent intent = new Intent();
         intent.putExtra("pos", position);
+        intent.putExtra("code", IntentCode.OutputCode);
         intent.putExtra("data", new Gson().toJson(datas.get(position).getOutCode()));
         intent.setClass(this, OutputEditDialog.class);
         startActivityForResult(intent, 1);
