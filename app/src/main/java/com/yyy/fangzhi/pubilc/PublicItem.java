@@ -14,6 +14,15 @@ public class PublicItem {
     int qtyPos;
     int qtyFlawPos;
     double qty;
+    int count;
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
 
     public double getFQty() {
         return qty;

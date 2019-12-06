@@ -110,7 +110,9 @@ public class ExchangeActivity extends AppCompatActivity {
     int position;
     int storageIdOut;
     int storageIdIn;
+    int totalNum;
 
+    double totalLength;
 
     List<Storage> storages;
     List<Storage.BerCh> berChes;
@@ -199,6 +201,8 @@ public class ExchangeActivity extends AppCompatActivity {
         tiPos.setTitle(getString(R.string.item_berch_in));
         tiPos.setContentBlack();
         tiPos.setTitleMargin(0, 0, getResources().getDimensionPixelOffset(R.dimen.dp_10), 0);
+        itNum.setTitle("总卷数：");
+        itQty.setTitle("总米数：");
     }
 
     private void setSelectListener() {
@@ -602,8 +606,8 @@ public class ExchangeActivity extends AppCompatActivity {
             @Override
             public void run() {
 //                tvStorage.setText(mainData.optString("sStockName"));
-                tiStorageIn.setContent( mainData.optString("sOutStockName"));
-                tiStorageOut.setContent( mainData.optString("sInStockName"));
+                tiStorageIn.setContent(mainData.optString("sOutStockName"));
+                tiStorageOut.setContent(mainData.optString("sInStockName"));
             }
         });
 
@@ -651,8 +655,14 @@ public class ExchangeActivity extends AppCompatActivity {
     private PublicItem getBarcodeItem(JSONObject jsonObject) throws JSONException, NullPointerException, Exception {
         PublicItem item = new PublicItem();
         List<ConfigureInfo> list = new ArrayList<>();
+//        Log.e("data", jsonObject.toString());
         for (BarcodeColumn column : barcodeColumns) {
-
+            if (column.getSFieldsName().equals("fQty")) {
+                item.setFQty(StringUtil.stringTOdouble(jsonObject.optString(column.getSFieldsName())));
+            }
+            if (column.getSFieldsName().equals("iQty")) {
+                item.setCount(StringUtil.stringTOint(jsonObject.optString(column.getSFieldsName())));
+            }
             if (column.getIHide() == 0) {
                 ConfigureInfo info = new ConfigureInfo();
                 info.setSingleLine(true);
@@ -708,11 +718,24 @@ public class ExchangeActivity extends AppCompatActivity {
                 } else {
                     adapter.notifyDataSetChanged();
                 }
+                setTotal();
             }
         });
 
     }
 
+    private void setTotal() {
+        getTotal();
+        itQty.setContent(totalLength + "");
+        itNum.setContent(totalNum + "");
+    }
+
+    private void getTotal() {
+        for (PublicItem item : datas) {
+            totalNum = totalNum + item.getCount();
+            totalLength = totalLength + item.getFQty();
+        }
+    }
 
     @OnClick({R.id.iv_back, R.id.tv_empty, R.id.tv_delete, R.id.tv_save, R.id.tv_submit, R.id.tv_clear})
     public void onViewClicked(View view) {

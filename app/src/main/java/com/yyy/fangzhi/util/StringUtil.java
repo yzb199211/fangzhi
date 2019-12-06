@@ -41,7 +41,13 @@ public class StringUtil {
             return 0;
         }
     }
-
+    public static int stringTOint(String s) {
+        try {
+            return Integer.parseInt(s);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
     /**
      * 判断颜色是否正确
      *

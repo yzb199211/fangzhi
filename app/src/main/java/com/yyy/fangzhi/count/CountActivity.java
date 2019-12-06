@@ -107,6 +107,9 @@ public class CountActivity extends AppCompatActivity {
     int iRecNo;
     int position;
     int storageId;
+    int totalNum;
+
+    double totalLength;
 
     List<Storage> storages;
     List<Storage.BerCh> berChes;
@@ -190,6 +193,8 @@ public class CountActivity extends AppCompatActivity {
         tiPos.setTitle(getString(R.string.item_berch));
         tiPos.setContentBlack();
         tiPos.setTitleMargin(0, 0, getResources().getDimensionPixelOffset(R.dimen.dp_10), 0);
+        itNum.setTitle("总卷数：");
+        itQty.setTitle("总米数：");
     }
 
     private void showView() {
@@ -516,18 +521,22 @@ public class CountActivity extends AppCompatActivity {
         PublicItem item = new PublicItem();
         PublicItem.CountCode code = new PublicItem.CountCode();
         List<ConfigureInfo> list = new ArrayList<>();
+//        Log.e("data", jsonObject.toString());
         for (BarcodeColumn column : barcodeColumns) {
             if (column.getSFieldsName().equals("sBarCode")) {
-                Log.e("sBarCode", jsonObject.optString(column.getSFieldsName()) + "");
+//                Log.e("sBarCode", jsonObject.optString(column.getSFieldsName()) + "");
                 code.setCode(jsonObject.optString(column.getSFieldsName()));
             }
             if (column.getSFieldsName().equals("sTrayCode")) {
-                Log.e("sTrayCode", jsonObject.optString(column.getSFieldsName()) + "");
+//                Log.e("sTrayCode", jsonObject.optString(column.getSFieldsName()) + "");
                 code.setTray(jsonObject.optString(column.getSFieldsName()));
             }
             if (column.getSFieldsName().equals("fQty")) {
-
                 code.setQty(StringUtil.stringTOdouble(jsonObject.optString(column.getSFieldsName())));
+                item.setFQty(StringUtil.stringTOdouble(jsonObject.optString(column.getSFieldsName())));
+            }
+            if (column.getSFieldsName().equals("iQty")) {
+                item.setCount(StringUtil.stringTOint(jsonObject.optString(column.getSFieldsName())));
             }
             if (column.getIHide() == 0) {
                 ConfigureInfo info = new ConfigureInfo();
@@ -623,9 +632,23 @@ public class CountActivity extends AppCompatActivity {
                 } else {
                     adapter.notifyDataSetChanged();
                 }
+                setTotal();
             }
         });
 
+    }
+
+    private void setTotal() {
+        getTotal();
+        itQty.setContent(totalLength + "");
+        itNum.setContent(totalNum + "");
+    }
+
+    private void getTotal() {
+        for (PublicItem item : datas) {
+            totalNum = totalNum + item.getCount();
+            totalLength = totalLength + item.getFQty();
+        }
     }
 
     @OnClick({R.id.iv_back, R.id.tv_empty, R.id.tv_clear, R.id.tv_delete, R.id.tv_save, R.id.tv_submit})
