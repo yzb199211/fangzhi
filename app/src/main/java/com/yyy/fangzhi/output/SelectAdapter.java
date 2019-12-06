@@ -38,11 +38,11 @@ public class SelectAdapter extends RecyclerView.Adapter<SelectAdapter.VH> {
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
-        holder.tiOrder.setTitle("订单号：").setContent(list.get(position).getSOrderNo());
-        holder.tiName.setTitle("品名：").setContent(list.get(position).getSName());
-        holder.tiColor.setTitle("色号/客户色号：").setContent(list.get(position).getSColorID() + "/" + list.get(position).getSCustColorID());
-        holder.tiSize.setTitle("门幅/克重：").setContent(list.get(position).getFProductWidth() + "/" + list.get(position).getFProductWeight());
-        holder.tiQty.setTitle("需发/未发米数").setContent(list.get(position).getFNeedQty() + "/" + list.get(position).getFNoOutQty());
+        holder.tiOrder.setTitle("订单号：").setContent(list.get(position).getSOrderNo()).removeContentClick();
+        holder.tiName.setTitle("品名：").setContent(list.get(position).getSName()).removeContentClick();
+        holder.tiColor.setTitle("色号/客户色号：").setContent(list.get(position).getSColorID() + "/" + list.get(position).getSCustColorID()).removeContentClick();
+        holder.tiSize.setTitle("门幅/克重：").setContent(list.get(position).getFProductWidth() + "/" + list.get(position).getFProductWeight()).removeContentClick();
+        holder.tiQty.setTitle("需发/未发米数").setContent(list.get(position).getFNeedQty() + "/" + list.get(position).getFNoOutQty()).removeContentClick();
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

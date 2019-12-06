@@ -24,6 +24,7 @@ import com.yyy.fangzhi.R;
 import com.yyy.fangzhi.dialog.JudgeDialog;
 import com.yyy.fangzhi.dialog.LoadingDialog;
 import com.yyy.fangzhi.exchange.ExchangeActivity;
+import com.yyy.fangzhi.interfaces.OnClickListener2;
 import com.yyy.fangzhi.interfaces.OnEntryListener;
 import com.yyy.fangzhi.interfaces.OnItemClickListener;
 import com.yyy.fangzhi.interfaces.ResponseListener;
@@ -234,7 +235,7 @@ public class CountActivity extends AppCompatActivity {
     }
 
     private void setStorageListener() {
-        tiStorage.setOnItemClickListener(new OnItemClickListener() {
+        tiStorage.setOnItemClickListener(new OnClickListener2() {
             @Override
             public void onItemClick(View view, int position) {
                 if (storages.size() == 0) {
@@ -247,7 +248,7 @@ public class CountActivity extends AppCompatActivity {
     }
 
     private void setBerchInListener() {
-        tiPos.setOnItemClickListener(new OnItemClickListener() {
+        tiPos.setOnItemClickListener(new OnClickListener2() {
             @Override
             public void onItemClick(View view, int position) {
                 if (storageId == 0) {

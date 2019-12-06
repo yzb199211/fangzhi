@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -38,22 +39,22 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.VH> {
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
-        holder.tiNo.setTitle("通知单号：").setContent(list.get(position).getSBillNo());
-        holder.tiFinish.setContent(list.get(position).getIFinish() == 0 ? "" : "完成").setContentColor(context.getResources().getColor(R.color.red));
-        holder.tiOrder.setTitle("订单号：").setContent(list.get(position).getSContractNos());
-        holder.tiRed.setContent(list.get(position).getIRed() == 0 ? "" : "红冲").setContentColor(context.getResources().getColor(R.color.red));
-        holder.tiCus.setTitle("客户：").setContent(list.get(position).getSCustShortName());
-        holder.tiCut.setContent(list.get(position).getICut() == 0 ? "" : "零件").setContentColor(context.getResources().getColor(R.color.red));
-        holder.tiName.setTitle("产品：").setContent(list.get(position).getSName());
-        holder.tiColor.setTitle("色号：").setContent(list.get(position).getSColorID());
-        holder.tiNeed.setTitle("需求米数：").setContent(list.get(position).getFQty() + "");
-        holder.tiDo.setTitle("已发米数：").setContent(list.get(position).getFOutQty() + "");
-        holder.tiUndo.setTitle("未发米数：").setContent(list.get(position).getFNoOutQty() + "");
-        holder.tiDate.setTitle("下发日期：").setContent(list.get(position).getDDate());
+        holder.tiNo.setTitle("通知单号：").setContent(list.get(position).getSBillNo()).removeContentClick();
+        holder.tiFinish.setContent(list.get(position).getIFinish() == 0 ? "" : "完成").setContentColor(context.getResources().getColor(R.color.red)).removeContentClick();
+        holder.tiOrder.setTitle("订单号：").setContent(list.get(position).getSContractNos()).removeContentClick();
+        holder.tiRed.setContent(list.get(position).getIRed() == 0 ? "" : "红冲").setContentColor(context.getResources().getColor(R.color.red)).removeContentClick();
+        holder.tiCus.setTitle("客户：").setContent(list.get(position).getSCustShortName()).removeContentClick();
+        holder.tiCut.setContent(list.get(position).getICut() == 0 ? "" : "零件").setContentColor(context.getResources().getColor(R.color.red)).removeContentClick();
+        holder.tiName.setTitle("产品：").setContent(list.get(position).getSName()).removeContentClick();
+        holder.tiColor.setTitle("色号：").setContent(list.get(position).getSColorID()).removeContentClick();
+        holder.tiNeed.setTitle("需求米数：").setContent(list.get(position).getFQty() + "").removeContentClick();
+        holder.tiDo.setTitle("已发米数：").setContent(list.get(position).getFOutQty() + "").removeContentClick();
+        holder.tiUndo.setTitle("未发米数：").setContent(list.get(position).getFNoOutQty() + "").removeContentClick();
+        holder.tiDate.setTitle("下发日期：").setContent(list.get(position).getDDate()).removeContentClick();
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.e("click","clock");
+                Log.e("click", "clock");
                 if (onItemClickListener != null)
                     onItemClickListener.onItemClick(v, position);
             }

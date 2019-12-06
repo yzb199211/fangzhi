@@ -24,6 +24,7 @@ import com.yyy.fangzhi.R;
 import com.yyy.fangzhi.dialog.JudgeDialog;
 import com.yyy.fangzhi.dialog.LoadingDialog;
 import com.yyy.fangzhi.input.InputDetailActivity;
+import com.yyy.fangzhi.interfaces.OnClickListener2;
 import com.yyy.fangzhi.interfaces.OnEntryListener;
 import com.yyy.fangzhi.interfaces.OnItemClickListener;
 import com.yyy.fangzhi.interfaces.ResponseListener;
@@ -207,7 +208,7 @@ public class ExchangeActivity extends AppCompatActivity {
     }
 
     private void setStorageOutListener() {
-        tiStorageOut.setOnItemClickListener(new OnItemClickListener() {
+        tiStorageOut.setOnItemClickListener(new OnClickListener2() {
             @Override
             public void onItemClick(View view, int position) {
                 if (storages.size() == 0) {
@@ -222,12 +223,14 @@ public class ExchangeActivity extends AppCompatActivity {
     }
 
     private void setStorageInListener() {
-        tiStorageIn.setOnItemClickListener(new OnItemClickListener() {
+        tiStorageIn.setOnItemClickListener(new OnClickListener2() {
             @Override
             public void onItemClick(View view, int position) {
                 if (storages.size() == 0) {
                     getStorageData(2, false);
                 } else {
+                    if (pvStorageIn == null)
+                        initStoragePickIn(false);
                     pvStorageIn.show();
                 }
             }
@@ -236,7 +239,7 @@ public class ExchangeActivity extends AppCompatActivity {
 
     private void setBerchInListener() {
 
-        tiPos.setOnItemClickListener(new OnItemClickListener() {
+        tiPos.setOnItemClickListener(new OnClickListener2() {
             @Override
             public void onItemClick(View view, int position) {
                 if (storageIdIn == 0) {
@@ -593,10 +596,14 @@ public class ExchangeActivity extends AppCompatActivity {
 
     private void setMainData(JSONObject mainData) throws NullPointerException {
 //        storageId = mainData.optInt("iBscDataStockMRecNo", 0);
+        storageIdOut = mainData.optInt("iOutBscDataStockMRecNo", 0);
+        storageIdIn = mainData.optInt("iInBscDataStockMRecNo", 0);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
 //                tvStorage.setText(mainData.optString("sStockName"));
+                tiStorageIn.setContent( mainData.optString("sOutStockName"));
+                tiStorageOut.setContent( mainData.optString("sInStockName"));
             }
         });
 
@@ -605,6 +612,22 @@ public class ExchangeActivity extends AppCompatActivity {
     private void setChildData(JSONArray childData) throws NullPointerException, JSONException, Exception {
         for (int i = 0; i < childData.length(); i++) {
             codes.add(childData.getJSONObject(i).optString("sBarCode"));
+            if (i == 0) {
+                Log.e("mainData", childData.getJSONObject(i).toString());
+                berchId = childData.getJSONObject(i).optInt("iInBscDataStockDRecNo");
+                String berch = childData.getJSONObject(i).optString("sInBerChID");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (berchId != 0) {
+                            tiPos.setContent(berch);
+//                            etBerch.setVisibility(View.VISIBLE);
+//                            ivBerch.setVisibility(View.VISIBLE);
+//                            tvBerch.setVisibility(View.VISIBLE);
+                        }
+                    }
+                });
+            }
         }
         datas.addAll(initBarcodeData(childData));
         refreshList();
@@ -629,6 +652,7 @@ public class ExchangeActivity extends AppCompatActivity {
         PublicItem item = new PublicItem();
         List<ConfigureInfo> list = new ArrayList<>();
         for (BarcodeColumn column : barcodeColumns) {
+
             if (column.getIHide() == 0) {
                 ConfigureInfo info = new ConfigureInfo();
                 info.setSingleLine(true);
@@ -697,6 +721,7 @@ public class ExchangeActivity extends AppCompatActivity {
                 finish();
                 break;
             case R.id.tv_empty:
+                getData();
                 break;
             case R.id.tv_delete:
                 isDelete();

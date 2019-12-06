@@ -4,7 +4,11 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -23,10 +27,13 @@ import com.google.gson.reflect.TypeToken;
 import com.yyy.fangzhi.R;
 import com.yyy.fangzhi.dialog.JudgeDialog;
 import com.yyy.fangzhi.dialog.LoadingDialog;
+import com.yyy.fangzhi.exchange.ExchangeActivity;
+import com.yyy.fangzhi.interfaces.OnClickListener2;
 import com.yyy.fangzhi.interfaces.OnEntryListener;
 import com.yyy.fangzhi.interfaces.OnItemClickListener;
 import com.yyy.fangzhi.interfaces.ResponseListener;
 import com.yyy.fangzhi.model.BarcodeColumn;
+import com.yyy.fangzhi.model.Storage;
 import com.yyy.fangzhi.pubilc.DataFormat;
 import com.yyy.fangzhi.pubilc.PublicAdapter;
 import com.yyy.fangzhi.pubilc.PublicItem;
@@ -42,6 +49,9 @@ import com.yyy.fangzhi.view.Configure.ConfigureInfo;
 import com.yyy.fangzhi.view.EditListenerView;
 import com.yyy.fangzhi.view.TextItem;
 import com.yyy.fangzhi.view.recycle.RecyclerViewDivider;
+import com.yyy.yyylibrary.pick.builder.OptionsPickerBuilder;
+import com.yyy.yyylibrary.pick.listener.OnOptionsSelectListener;
+import com.yyy.yyylibrary.pick.view.OptionsPickerView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -111,6 +121,7 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
     private List<BarcodeColumn> barcodeColumns;
     private List<PublicItem> datas;
     private List<String> codes;
+    List<Storage> storages;
 
     private JudgeDialog deleteDialog;
     private JudgeDialog clearDialog;
@@ -120,6 +131,7 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
     private PublicAdapter adapter;
 
     private SharedPreferencesHelper preferencesHelper;
+    private OptionsPickerView pvStorage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,6 +151,7 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
     }
 
     private void initList() {
+        storages = new ArrayList<>();
         barcodeColumns = new ArrayList<>();
         datas = new ArrayList<>();
         codes = new ArrayList<>();
@@ -166,6 +179,22 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
         tvTitle.setText(title);
         initRecycle();
         setCodeListener();
+        setClickListener();
+    }
+
+    private void setClickListener() {
+        itStorage.setContentPadding();
+        itStorage.setContentBlack();
+        itStorage.setOnItemClickListener(new OnClickListener2() {
+            @Override
+            public void onItemClick(View view, int position) {
+                if (storages.size() == 0) {
+                    getStorageData();
+                } else {
+                    pvStorage.show();
+                }
+            }
+        });
     }
 
     private void initRecycle() {
@@ -189,6 +218,87 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private List<NetParams> getStorageParams() {
+        List<NetParams> params = new ArrayList<>();
+        params.add(new NetParams("otype", Otypes.GetStockMD));
+        params.add(new NetParams("userid", userid));
+        params.add(new NetParams("database", companyCode));
+        return params;
+    }
+
+    private void getStorageData() {
+        LoadingDialog.showDialogForLoading(this);
+        new NetUtil(getStorageParams(), url, new ResponseListener() {
+            @Override
+            public void onSuccess(String string) {
+                try {
+                    JSONObject jsonObject = new JSONObject(string);
+                    if (jsonObject.optBoolean("success")) {
+                        storages.addAll(new Gson().fromJson(initStorageData(jsonObject.optJSONArray("tables")), new TypeToken<List<Storage>>() {
+                        }.getType()));
+                        LoadingFinish(null);
+                        initStoragePickOut();
+
+                    } else {
+                        LoadingFinish(jsonObject.optString("message"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_json));
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.empty_data));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    LoadingFinish(getString(R.string.error_data));
+                }
+            }
+
+            @Override
+            public void onFail(IOException e) {
+                e.printStackTrace();
+                LoadingFinish(e.getMessage());
+            }
+        });
+    }
+
+
+    private String initStorageData(JSONArray jsonArray) throws NullPointerException, Exception {
+        return jsonArray.optString(0);
+    }
+
+    private void initStoragePickOut() {
+        if (storages.size() > 0) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    pvStorage = new OptionsPickerBuilder(OutputDetailInnerActivity.this, new OnOptionsSelectListener() {
+                        @Override
+                        public void onOptionsSelect(int options1, int options2, int options3, View v) {
+                            if (storageId != storages.get(options1).getIBscDataStockMRecNo()) {
+                                storageId = storages.get(options1).getIBscDataStockMRecNo();
+                                itStorage.setContent(storages.get(options1).getSStockName());
+                            }
+                        }
+                    })
+                            .setTitleText("仓库选择")
+                            .setContentTextSize(18)//设置滚轮文字大小
+                            .setDividerColor(Color.LTGRAY)//设置分割线的颜色
+                            .setSelectOptions(0)//默认选中项
+                            .isRestoreItem(true)//切换时是否还原，设置默认选中第一项。
+                            .isCenterLabel(false) //是否只显示中间选中项的label文字，false则每项item全部都带有label。
+                            .setLabels("", "", "")
+                            .isDialog(true)
+                            .setBgColor(0xFFFFFFFF) //设置外部遮罩颜色
+                            .build();
+                    pvStorage.setPicker(storages);//一级选择器
+                    setDialog(pvStorage);
+                    pvStorage.show();
+                }
+            });
+        }
     }
 
     private List<NetParams> getCodeParams(String s) {
@@ -295,7 +405,7 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
         });
     }
 
-    @OnClick({R.id.iv_back, R.id.tv_empty, R.id.tv_clear, R.id.tv_delete, R.id.tv_save, R.id.tv_submit})
+    @OnClick({R.id.iv_back, R.id.tv_empty, R.id.tv_clear, R.id.tv_delete, R.id.tv_save, R.id.tv_submit, R.id.iv_storage})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.iv_back:
@@ -305,6 +415,7 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
                 getData();
                 break;
             case R.id.tv_clear:
+                isClear();
                 break;
             case R.id.tv_delete:
                 isDelete();
@@ -314,6 +425,15 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
                 break;
             case R.id.tv_submit:
                 isSubmit();
+                break;
+            case R.id.iv_storage:
+                if (storages.size() == 0) {
+                    getStorageData();
+                } else {
+                    pvStorage.show();
+                }
+                break;
+            default:
                 break;
         }
     }
@@ -333,6 +453,27 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
                 break;
             default:
                 break;
+        }
+    }
+
+    private void isClear() {
+        if (clearDialog == null) {
+            clearDialog = new JudgeDialog(this, R.style.JudgeDialog, "是否清空条码？", new JudgeDialog.OnCloseListener() {
+                @Override
+                public void onClick(boolean confirm) {
+                    if (confirm)
+                        clear();
+                }
+            });
+        }
+        clearDialog.show();
+    }
+
+    private void clear() {
+        if (adapter != null) {
+            datas.clear();
+            codes.clear();
+            adapter.notifyDataSetChanged();
         }
     }
 
@@ -743,6 +884,37 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
             return 0;
         }
     }
+
+    private void setDialog(OptionsPickerView pickview) {
+        getDialogLayoutParams();
+        pickview.getDialogContainerLayout().setLayoutParams(getDialogLayoutParams());
+        initDialogWindow(pickview.getDialog().getWindow());
+    }
+
+    private void initDialogWindow(Window window) {
+        window.setWindowAnimations(R.style.picker_view_slide_anim);//修改动画样式
+        window.setGravity(Gravity.BOTTOM);//改成Bottom,底部显示
+        window.setDimAmount(0.1f);
+        window.setAttributes(getDialogWindowLayoutParams(window));
+    }
+
+    private WindowManager.LayoutParams getDialogWindowLayoutParams(Window window) {
+        WindowManager.LayoutParams winParams;
+        winParams = window.getAttributes();
+        winParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+        return winParams;
+    }
+
+    private FrameLayout.LayoutParams getDialogLayoutParams() {
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                Gravity.BOTTOM);
+        params.leftMargin = 0;
+        params.rightMargin = 0;
+        return params;
+    }
+
 
     private void LoadingFinish(String msg) {
         runOnUiThread(new Runnable() {

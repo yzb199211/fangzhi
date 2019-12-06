@@ -6,7 +6,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -15,17 +14,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.yyy.fangzhi.R;
-import com.yyy.fangzhi.interfaces.OnItemClickListener;
+import com.yyy.fangzhi.interfaces.OnClickListener2;
 
 
 public class TextItem extends LinearLayout {
     Context context;
     TextView tvContent;
     TextView tvTitle;
-    OnItemClickListener onItemClickListener;
+    OnClickListener2 onItemClickListener;
     LinearLayout.LayoutParams params;
 
-    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+    public void setOnItemClickListener(OnClickListener2 onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
         setContentPadding();
     }
@@ -47,6 +46,11 @@ public class TextItem extends LinearLayout {
 
     public TextItem setHint(String hint) {
         tvContent.setHint(hint);
+        return this;
+    }
+
+    public TextItem removeContentClick() {
+        tvContent.setClickable(false);
         return this;
     }
 
