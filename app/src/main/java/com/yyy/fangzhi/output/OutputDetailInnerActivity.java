@@ -180,6 +180,16 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
         initRecycle();
         setCodeListener();
         setClickListener();
+        setRedListener();
+    }
+
+    private void setRedListener() {
+        svRed.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                iRed = isChecked ? 1 : 0;
+            }
+        });
     }
 
     private void setClickListener() {
@@ -308,7 +318,7 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
         params.add(new NetParams("database", companyCode));
         params.add(new NetParams("sBarCode", s));
         params.add(new NetParams("iBscDataStockMRecNo", storageId + ""));
-        params.add(new NetParams("iRed", 0 + ""));
+        params.add(new NetParams("iRed", iRed + ""));
         return params;
     }
 
@@ -473,6 +483,7 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
         if (adapter != null) {
             datas.clear();
             codes.clear();
+            svRed.setClickable(true);
             adapter.notifyDataSetChanged();
         }
     }

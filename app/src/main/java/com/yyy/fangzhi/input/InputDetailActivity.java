@@ -40,6 +40,7 @@ import com.yyy.fangzhi.util.net.NetUtil;
 import com.yyy.fangzhi.util.net.Otypes;
 import com.yyy.fangzhi.view.Configure.ConfigureInfo;
 import com.yyy.fangzhi.view.EditListenerView;
+import com.yyy.fangzhi.view.TextItem;
 import com.yyy.fangzhi.view.recycle.RecyclerViewDivider;
 import com.yyy.yyylibrary.pick.builder.OptionsPickerBuilder;
 import com.yyy.yyylibrary.pick.listener.OnOptionsSelectListener;
@@ -92,6 +93,14 @@ public class InputDetailActivity extends AppCompatActivity {
     TextView tvDelete;
     @BindView(R.id.tv_clear)
     TextView tvClear;
+    @BindView(R.id.ll_two)
+    LinearLayout llTwo;
+    @BindView(R.id.ll_three)
+    LinearLayout llThree;
+    @BindView(R.id.it_qty)
+    TextItem tiQty;
+    @BindView(R.id.it_num)
+    TextItem tiNum;
 
     String userid;
     String url;
@@ -103,6 +112,9 @@ public class InputDetailActivity extends AppCompatActivity {
     int iRecNo;
     int orderNo = 0;
     int position;
+    int totalNum;
+
+    double totalLength;
 
     String title;
     int storageId;
@@ -169,15 +181,25 @@ public class InputDetailActivity extends AppCompatActivity {
     }
 
     private void initView() {
+        initVisiable();
+        initViewState();
+        initRecycle();
+        setBerchListener();
+        setCodeListener();
+    }
+
+    private void initVisiable() {
         if (iRecNo == 0) {
             tvDelete.setVisibility(View.INVISIBLE);
         }
         ivRight.setVisibility(View.GONE);
-        tvTitle.setText(title);
         bottomLayout.setVisibility(View.GONE);
-        initRecycle();
-        setBerchListener();
-        setCodeListener();
+    }
+
+    private void initViewState() {
+        tvTitle.setText(title);
+        tiQty.setTitleMargin(0, 0, 0, 0).setTitle("总米数：");
+        tiNum.setTitleMargin(0, 0, 0, 0).setTitle("总卷数：");
     }
 
     private void initRecycle() {
@@ -336,6 +358,8 @@ public class InputDetailActivity extends AppCompatActivity {
                 rvItem.setVisibility(View.VISIBLE);
                 bottomLayout.setVisibility(View.VISIBLE);
                 tvClear.setVisibility(View.VISIBLE);
+                llTwo.setVisibility(View.VISIBLE);
+                llThree.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -401,6 +425,9 @@ public class InputDetailActivity extends AppCompatActivity {
         PublicItem item = new PublicItem();
         List<ConfigureInfo> list = new ArrayList<>();
         for (BarcodeColumn column : barcodeColumns) {
+            if (column.getSFieldsName().equals("fQty")) {
+                item.setFQty(StringUtil.stringTOdouble(jsonObject.optString(column.getSFieldsName())));
+            }
             if (column.getIHide() == 0) {
                 ConfigureInfo info = new ConfigureInfo();
                 info.setSingleLine(true);
@@ -456,9 +483,23 @@ public class InputDetailActivity extends AppCompatActivity {
                 } else {
                     adapter.notifyDataSetChanged();
                 }
+                setTotal();
             }
         });
 
+    }
+
+    private void setTotal() {
+        getTotal();
+        tiQty.setContent(totalLength + "");
+        tiNum.setContent(totalNum + "");
+    }
+
+    private void getTotal() {
+        for (PublicItem item : datas) {
+            totalNum = totalNum + 1;
+            totalLength = totalLength + item.getFQty();
+        }
     }
 
     private void isRemove(int position) {
@@ -824,7 +865,7 @@ public class InputDetailActivity extends AppCompatActivity {
                             .build();
                     pvStorage.setPicker(storages);//一级选择器
                     setDialog(pvStorage);
-                    if (storageId != 0&&isBerch) {
+                    if (storageId != 0 && isBerch) {
                         for (int i = 0; i < storages.size(); i++) {
                             if (storages.get(i).getIBscDataStockMRecNo() == storageId) {
                                 setBerch(storages.get(i).getBerChes());

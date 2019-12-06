@@ -13,6 +13,15 @@ public class PublicItem {
     int trayPos;
     int qtyPos;
     int qtyFlawPos;
+    double qty;
+
+    public double getFQty() {
+        return qty;
+    }
+
+    public void setFQty(double qty) {
+        this.qty = qty;
+    }
 
     public void setCountCode(PublicItem.CountCode countCode) {
         CountCode = countCode;

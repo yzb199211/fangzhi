@@ -124,11 +124,12 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/ll_two"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_40"
         android:layout_marginTop="@dimen/dp_1"
-        android:background="@color/white"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:visibility="gone">
 
         <com.yyy.fangzhi.view.EditListenerView
             android:id="@+id/et_code"
@@ -159,6 +160,31 @@
             android:textColor="@color/red"
             android:textSize="@dimen/sp_14"
             android:visibility="gone" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_three"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_40"
+        android:layout_marginTop="@dimen/dp_1"
+        android:background="@color/white"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/dp_10"
+        android:paddingRight="@dimen/dp_10"
+        android:visibility="gone">
+
+        <com.yyy.fangzhi.view.TextItem
+            android:id="@+id/it_qty"
+            android:layout_width="@dimen/dp_0"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <com.yyy.fangzhi.view.TextItem
+            android:id="@+id/it_num"
+            android:layout_width="@dimen/dp_0"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/dp_1"
+            android:layout_weight="1" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
