@@ -31,6 +31,7 @@ import com.yyy.fangzhi.exchange.ExchangeActivity;
 import com.yyy.fangzhi.interfaces.OnClickListener2;
 import com.yyy.fangzhi.interfaces.OnEntryListener;
 import com.yyy.fangzhi.interfaces.OnItemClickListener;
+import com.yyy.fangzhi.interfaces.OnItemLongClickListener;
 import com.yyy.fangzhi.interfaces.ResponseListener;
 import com.yyy.fangzhi.model.BarcodeColumn;
 import com.yyy.fangzhi.model.Storage;
@@ -115,6 +116,9 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
     private int iRecNo;
     private int storageId = 0;
     int pos;
+    int totalNum;
+
+    double totalLength;
 
     private boolean canDelete;
 
@@ -174,13 +178,23 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        ivRight.setVisibility(View.GONE);
-        bottomLayout.setVisibility(View.GONE);
-        tvTitle.setText(title);
+        initVisiable();
+        initViewState();
         initRecycle();
         setCodeListener();
         setClickListener();
         setRedListener();
+    }
+
+    private void initVisiable() {
+        ivRight.setVisibility(View.GONE);
+        bottomLayout.setVisibility(View.GONE);
+    }
+
+    private void initViewState() {
+        tvTitle.setText(title);
+        itNum.setTitle("总卷数：");
+        itQty.setTitle("总米数：");
     }
 
     private void setRedListener() {
@@ -219,6 +233,10 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
                 KeyBoardUtil.hideInput(OutputDetailInnerActivity.this);
                 String code = etCode.getText().toString();
                 etCode.setText("");
+                if (storageId == 0) {
+                    Toast("请选择仓库");
+                    return;
+                }
                 if (codes.contains(code)) {
                     Toast(getString(R.string.repeat_code));
                     return;
@@ -484,7 +502,7 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
             datas.clear();
             codes.clear();
             svRed.setClickable(true);
-            adapter.notifyDataSetChanged();
+            refreshList();
         }
     }
 
@@ -501,7 +519,7 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
                     if (codes.size() == 0) {
                         isEmpty(true);
                     }
-                    adapter.notifyDataSetChanged();
+                    refreshList();
                 }
             }
         });
@@ -601,7 +619,7 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
         for (PublicItem code : datas) {
             codes = codes + code.getOutCode().toString();
         }
-        Log.d("codes", codes);
+//        Log.d("codes", codes);
         return codes;
     }
 
@@ -716,6 +734,7 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
         datas.get(pos).setQty(code.getOutQty());
         datas.get(pos).setFlawQty(code.getFlawQty());
         datas.get(pos).setTray(code.getTray());
+        datas.get(pos).setFQty(code.getOutQty());
         refreshList();
     }
 
@@ -731,13 +750,35 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
                             editCode(position);
                         }
                     });
+                    adapter.setOnItemLongClickListener(new OnItemLongClickListener() {
+                        @Override
+                        public void itemLongClick(View v, int pos) {
+                            isRemove(pos);
+                        }
+                    });
                     rvItem.setAdapter(adapter);
                 } else {
                     adapter.notifyDataSetChanged();
                 }
+                setTotal();
             }
         });
 
+    }
+
+    private void setTotal() {
+        getTotal();
+        itQty.setContent(totalLength + "");
+        itNum.setContent(totalNum + "");
+    }
+
+    private void getTotal() {
+        totalNum = 0;
+        totalLength = 0;
+        for (PublicItem item : datas) {
+            totalNum = totalNum + item.getCount();
+            totalLength = totalLength + item.getFQty();
+        }
     }
 
     private void editCode(int position) {
@@ -838,12 +879,20 @@ public class OutputDetailInnerActivity extends AppCompatActivity {
         item.setOutCode(getOutCode(jsonObject));
         List<ConfigureInfo> list = new ArrayList<>();
 //        for (BarcodeColumn column : barcodeColumns) {
+        Log.e("data", jsonObject.toString());
+
         for (int i = 0; i < barcodeColumns.size(); i++) {
             BarcodeColumn column = barcodeColumns.get(i);
+
+            if (column.getSFieldsName().equals("iQty")) {
+                item.setCount(StringUtil.stringTOint(jsonObject.optString(column.getSFieldsName())));
+            }
             if (column.getSFieldsName().equals("sTrayCode"))
                 item.setTrayPos(i);
-            if (column.getSFieldsName().equals("fQty"))
+            if (column.getSFieldsName().equals("fQty")) {
                 item.setQtyPos(i);
+                item.setFQty(StringUtil.stringTOdouble(jsonObject.optString(column.getSFieldsName())));
+            }
             if (column.getSFieldsName().equals("fFlawQty"))
                 item.setQtyFlawPos(i);
             if (column.getIHide() == 0) {

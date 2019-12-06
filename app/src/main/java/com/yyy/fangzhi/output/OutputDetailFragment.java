@@ -616,6 +616,7 @@ public class OutputDetailFragment extends Fragment {
                 rvItem.setVisibility(View.VISIBLE);
                 bottomLayout.setVisibility(View.VISIBLE);
                 flEmpty.setVisibility(View.GONE);
+                scrollView.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -643,7 +644,7 @@ public class OutputDetailFragment extends Fragment {
         unbinder.unbind();
     }
 
-    @OnClick({R.id.tv_delete, R.id.tv_save, R.id.tv_submit, R.id.tv_empty})
+    @OnClick({R.id.tv_delete, R.id.tv_save, R.id.tv_submit, R.id.tv_empty, R.id.tv_clear})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.tv_delete:
@@ -658,8 +659,33 @@ public class OutputDetailFragment extends Fragment {
             case R.id.tv_empty:
                 getData();
                 break;
+            case R.id.tv_clear:
+                isClear();
+                break;
             default:
                 break;
+        }
+    }
+
+    private void isClear() {
+        if (clearDialog == null) {
+            clearDialog = new JudgeDialog(getActivity(), R.style.JudgeDialog, "是否清空条码？", new JudgeDialog.OnCloseListener() {
+                @Override
+                public void onClick(boolean confirm) {
+                    if (confirm)
+                        clear();
+                }
+            });
+        }
+        clearDialog.show();
+    }
+
+    private void clear() {
+        if (adapter != null) {
+            datas.clear();
+            codes.clear();
+            svRed.setClickable(true);
+            refreshList();
         }
     }
 

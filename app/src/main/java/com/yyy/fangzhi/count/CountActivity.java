@@ -687,7 +687,7 @@ public class CountActivity extends AppCompatActivity {
                 if (confirm) {
                     codes.remove(position);
                     datas.remove(position);
-                    adapter.notifyDataSetChanged();
+                    refreshList();
                 }
             }
         });
@@ -737,7 +737,7 @@ public class CountActivity extends AppCompatActivity {
         if (adapter != null) {
             datas.clear();
             codes.clear();
-            adapter.notifyDataSetChanged();
+            refreshList();
         }
     }
 

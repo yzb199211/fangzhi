@@ -512,7 +512,7 @@ public class InputDetailActivity extends AppCompatActivity {
                 if (confirm) {
                     codes.remove(position);
                     datas.remove(position);
-                    adapter.notifyDataSetChanged();
+                    refreshList();
                 }
             }
         });
@@ -575,7 +575,7 @@ public class InputDetailActivity extends AppCompatActivity {
         if (adapter != null) {
             datas.clear();
             codes.clear();
-            adapter.notifyDataSetChanged();
+            refreshList();
         }
     }
 

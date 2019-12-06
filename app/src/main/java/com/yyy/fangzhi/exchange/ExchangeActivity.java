@@ -773,7 +773,7 @@ public class ExchangeActivity extends AppCompatActivity {
                 if (confirm) {
                     codes.remove(position);
                     datas.remove(position);
-                    adapter.notifyDataSetChanged();
+                  refreshList();
                 }
             }
         });

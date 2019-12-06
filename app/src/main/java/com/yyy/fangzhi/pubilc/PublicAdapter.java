@@ -4,11 +4,13 @@ import android.content.Context;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.yyy.fangzhi.interfaces.OnItemClickListener;
+import com.yyy.fangzhi.interfaces.OnItemLongClickListener;
 import com.yyy.fangzhi.view.Configure.ConfigureInfo;
 import com.yyy.fangzhi.view.Configure.ConfigureView;
 
@@ -18,6 +20,7 @@ public class PublicAdapter extends RecyclerView.Adapter<PublicAdapter.VH> {
     List<PublicItem> list;
     Context context;
     OnItemClickListener onItemClickListener;
+    OnItemLongClickListener onItemLongClickListener;
 
     public PublicAdapter(List<PublicItem> list, Context context) {
         this.list = list;
@@ -43,6 +46,15 @@ public class PublicAdapter extends RecyclerView.Adapter<PublicAdapter.VH> {
                 }
             }
         });
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (onItemLongClickListener != null) {
+                    onItemLongClickListener.itemLongClick(v, position);
+                }
+                return false;
+            }
+        });
     }
 
     @Override
@@ -59,5 +71,9 @@ public class PublicAdapter extends RecyclerView.Adapter<PublicAdapter.VH> {
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
+    }
+
+    public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener) {
+        this.onItemLongClickListener = onItemLongClickListener;
     }
 }
