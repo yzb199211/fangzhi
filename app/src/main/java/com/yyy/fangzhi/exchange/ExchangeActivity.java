@@ -725,6 +725,8 @@ public class ExchangeActivity extends AppCompatActivity {
     }
 
     private void setTotal() {
+        totalNum = 0;
+        totalLength = 0;
         getTotal();
         itQty.setContent(totalLength + "");
         itNum.setContent(totalNum + "");
@@ -733,7 +735,7 @@ public class ExchangeActivity extends AppCompatActivity {
     private void getTotal() {
         for (PublicItem item : datas) {
             totalNum = totalNum + item.getCount();
-            totalLength = totalLength + item.getFQty();
+            totalLength = StringUtil.add(totalLength, item.getFQty());
         }
     }
 
@@ -773,7 +775,7 @@ public class ExchangeActivity extends AppCompatActivity {
                 if (confirm) {
                     codes.remove(position);
                     datas.remove(position);
-                  refreshList();
+                    refreshList();
                 }
             }
         });

@@ -527,7 +527,8 @@ public class CountActivity extends AppCompatActivity {
         PublicItem.CountCode code = new PublicItem.CountCode();
         List<ConfigureInfo> list = new ArrayList<>();
 //        Log.e("data", jsonObject.toString());
-        for (BarcodeColumn column : barcodeColumns) {
+        for (int i = 0; i < barcodeColumns.size(); i++) {
+            BarcodeColumn column = barcodeColumns.get(i);
             if (column.getSFieldsName().equals("sBarCode")) {
 //                Log.e("sBarCode", jsonObject.optString(column.getSFieldsName()) + "");
                 code.setCode(jsonObject.optString(column.getSFieldsName()));
@@ -537,8 +538,18 @@ public class CountActivity extends AppCompatActivity {
                 code.setTray(jsonObject.optString(column.getSFieldsName()));
             }
             if (column.getSFieldsName().equals("fQty")) {
-                code.setQty(StringUtil.stringTOdouble(jsonObject.optString(column.getSFieldsName())));
+                item.setQtyPos(i);
                 item.setFQty(StringUtil.stringTOdouble(jsonObject.optString(column.getSFieldsName())));
+            }
+            if (column.getSFieldsName().equals("fPcQty")) {
+                code.setQty(StringUtil.stringTOdouble(jsonObject.optString(column.getSFieldsName())));
+                item.setPcQtyPos(i);
+//                item.setPcQty(StringUtil.stringTOdouble(jsonObject.optString(column.getSFieldsName())));
+
+            }
+            if (column.getSFieldsName().equals("fStockQty")) {
+                item.setStockQty(StringUtil.stringTOdouble(jsonObject.optString(column.getSFieldsName())));
+
             }
             if (column.getSFieldsName().equals("iQty")) {
                 item.setCount(StringUtil.stringTOint(jsonObject.optString(column.getSFieldsName())));
@@ -652,7 +663,7 @@ public class CountActivity extends AppCompatActivity {
     private void editCode(int position) {
         Intent intent = new Intent();
         intent.putExtra("pos", position);
-        intent.putExtra("data", new Gson().toJson(datas.get(position).getOutCode()));
+        intent.putExtra("data", new Gson().toJson(datas.get(position).getCountCode()));
         intent.putExtra("code", IntentCode.CountCode);
         intent.setClass(this, OutputEditDialog.class);
         startActivityForResult(intent, 1);
@@ -665,29 +676,33 @@ public class CountActivity extends AppCompatActivity {
     }
 
     private void getTotal() {
+        totalNum = 0;
+        totalLength = 0;
         for (PublicItem item : datas) {
             totalNum = totalNum + item.getCount();
-            totalLength = totalLength + item.getFQty();
+            totalLength = StringUtil.add(totalLength, item.getFQty());
+
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (data != null&&resultCode==EditCode) {
+        if (data != null && resultCode == EditCode) {
             initResultEdit(data);
         }
     }
+
     private void initResultEdit(Intent data) {
         int pos = data.getIntExtra("pos", 0);
         PublicItem.OutCode code = new Gson().fromJson(data.getStringExtra("code"), PublicItem.OutCode.class);
-        datas.get(pos).getCountCode().setTray(code.getTray());
-        datas.get(pos).getCountCode().setQty(code.getOutQty());
-        datas.get(pos).setQty(code.getOutQty());
-        datas.get(pos).setTray(code.getTray());
-        datas.get(pos).setFQty(code.getOutQty());
+        datas.get(pos).getCountCode().setQty(StringUtil.sub(code.getOutQty(), datas.get(pos).getStockQty()));
+        datas.get(pos).setQty(StringUtil.sub(code.getOutQty(), datas.get(pos).getStockQty()));
+        datas.get(pos).setPcQty(code.getOutQty());
+        datas.get(pos).setFQty(StringUtil.sub(code.getOutQty(), datas.get(pos).getStockQty()));
         refreshList();
     }
+
     @OnClick({R.id.iv_back, R.id.tv_empty, R.id.tv_clear, R.id.tv_delete, R.id.tv_save, R.id.tv_submit})
     public void onViewClicked(View view) {
         switch (view.getId()) {

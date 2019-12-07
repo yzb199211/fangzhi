@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
@@ -41,6 +42,7 @@ public class StringUtil {
             return 0;
         }
     }
+
     public static int stringTOint(String s) {
         try {
             return Integer.parseInt(s);
@@ -48,6 +50,30 @@ public class StringUtil {
             return 0;
         }
     }
+
+    //两个Double数相减
+
+    public static Double sub(Double v1, Double v2) {
+
+        BigDecimal b1 = new BigDecimal(v1.toString());
+
+        BigDecimal b2 = new BigDecimal(v2.toString());
+
+        return b1.subtract(b2).doubleValue();
+
+    }
+
+    public static Double add(Double v1, Double v2) {
+
+        BigDecimal b1 = new BigDecimal(v1.toString());
+
+        BigDecimal b2 = new BigDecimal(v2.toString());
+
+        return b1.add(b2).doubleValue();
+
+    }
+
+
     /**
      * 判断颜色是否正确
      *

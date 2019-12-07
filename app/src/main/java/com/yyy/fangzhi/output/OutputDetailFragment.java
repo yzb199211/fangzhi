@@ -620,7 +620,7 @@ public class OutputDetailFragment extends Fragment {
         totalLength = 0;
         for (PublicItem item : datas) {
             totalNum = totalNum + item.getCount();
-            totalLength = totalLength + item.getFQty();
+            totalLength = StringUtil.add(totalLength, item.getFQty());
         }
     }
 
@@ -629,6 +629,7 @@ public class OutputDetailFragment extends Fragment {
         intent.putExtra("pos", position);
         intent.putExtra("data", new Gson().toJson(datas.get(position).getOutCode()));
         intent.putExtra("code", IntentCode.OutputCode);
+        intent.putExtra("red", iRed);
         intent.setClass(getActivity(), OutputEditDialog.class);
         startActivityForResult(intent, 1);
     }

@@ -37,6 +37,8 @@ public class OutputEditDialog extends AppCompatActivity {
     EditText etTray;
     @BindView(R.id.ll_tray)
     LinearLayout llTray;
+    @BindView(R.id.tv_qty_out)
+    TextView tvQtyOut;
 
     String code;
     String tray;
@@ -45,6 +47,7 @@ public class OutputEditDialog extends AppCompatActivity {
 
     int pos;
     int intentCode;
+    int iRed;
 
     JudgeDialog editDialog;
 
@@ -64,6 +67,7 @@ public class OutputEditDialog extends AppCompatActivity {
     private void getIntentData() {
         pos = getIntent().getIntExtra("pos", 1);
         intentCode = getIntent().getIntExtra("code", 0);
+        iRed = getIntent().getIntExtra("red", 0);
         getCode(new Gson().fromJson(getIntent().getStringExtra("data"), PublicItem.OutCode.class));
     }
 
@@ -85,11 +89,13 @@ public class OutputEditDialog extends AppCompatActivity {
     private void setViewVisiable() {
         switch (intentCode) {
             case IntentCode.OutputCode:
-                llTray.setVisibility(View.VISIBLE);
+                if (iRed == 1)
+                    llTray.setVisibility(View.VISIBLE);
                 break;
             case IntentCode.CountCode:
                 etQtyFlaw.setVisibility(View.GONE);
                 tvQtyFlaw.setVisibility(View.GONE);
+                tvQtyOut.setText(getResources().getString(R.string.qty_real));
                 break;
             default:
                 break;

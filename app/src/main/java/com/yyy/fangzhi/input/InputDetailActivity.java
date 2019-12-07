@@ -496,9 +496,11 @@ public class InputDetailActivity extends AppCompatActivity {
     }
 
     private void getTotal() {
+        totalNum = 0;
+        totalLength = 0;
         for (PublicItem item : datas) {
             totalNum = totalNum + 1;
-            totalLength = totalLength + item.getFQty();
+            totalLength = StringUtil.add(totalLength, item.getFQty());
         }
     }
 

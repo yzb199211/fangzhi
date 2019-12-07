@@ -8,13 +8,50 @@ public class PublicItem {
     List<ConfigureInfo> list;
     int id;
     String Code;
+    String tray;
+
     OutCode outCode;
     CountCode CountCode;
+
     int trayPos;
     int qtyPos;
+    int pcQtyPos;
     int qtyFlawPos;
+
     double qty;
+    double pcQty;
+    double stockQty;
+
+    public double getQty() {
+        return qty;
+    }
+
+    public double getStockQty() {
+        return stockQty;
+    }
+
+    public void setStockQty(double stockQty) {
+        this.stockQty = stockQty;
+    }
+
+    public double getPcQty() {
+        return pcQty;
+    }
+
+    public void setPcQty(double pcQty) {
+        this.pcQty = pcQty;
+        list.get(pcQtyPos).setContent(pcQty + "");
+    }
+
     int count;
+
+    public int getPcQtyPos() {
+        return pcQtyPos;
+    }
+
+    public void setPcQtyPos(int pcQtyPos) {
+        this.pcQtyPos = pcQtyPos;
+    }
 
     public int getCount() {
         return count;
@@ -96,7 +133,12 @@ public class PublicItem {
         this.id = id;
     }
 
+    public String getTray() {
+        return tray;
+    }
+
     public void setTray(String tray) {
+        this.tray = tray;
         list.get(trayPos).setContent(tray);
     }
 
@@ -112,6 +154,8 @@ public class PublicItem {
         private String code;
         private String tray;
         private double qty;
+        private double outQty;
+
 
         public String getCode() {
             return code;
@@ -135,6 +179,7 @@ public class PublicItem {
 
         public void setQty(double qty) {
             this.qty = qty;
+            this.outQty = qty;
         }
 
         public String toString() {
