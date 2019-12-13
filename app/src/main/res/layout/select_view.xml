@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="@dimen/dp_60"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:singleLine="true"
+        android:text="录入日期"
+        android:textColor="@color/default_content_color"
+        android:textSize="@dimen/sp_14" />
+
+    <TextView
+        android:id="@+id/tv_content"
+        android:layout_width="@dimen/dp_0"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="@dimen/dp_5"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:singleLine="true"
+        android:textColor="@color/default_content_color"
+        android:textSize="@dimen/sp_14"
+        android:visibility="gone" />
+
+    <EditText
+        android:id="@+id/et_content"
+        android:layout_width="@dimen/dp_0"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="@dimen/dp_5"
+        android:layout_weight="1"
+        android:background="@null"
+        android:gravity="center_vertical"
+        android:singleLine="true"
+        android:textColor="@color/default_content_color"
+        android:textSize="@dimen/sp_14"
+        android:visibility="gone" />
+
+    <Switch
+        android:id="@+id/switch_view"
+        android:layout_width="@dimen/dp_0"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|center_vertical"
+        android:layout_weight="1"
+        android:switchMinWidth="@dimen/dp_60"
+        android:thumb="@drawable/switch_thumb"
+        android:track="@drawable/switch_track"
+        android:visibility="gone" />
+
+</merge>

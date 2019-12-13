@@ -261,9 +261,11 @@ public class PublicListActivity extends AppCompatActivity {
                 break;
             case R.id.iv_right:
                 Intent intent = IntentUtil.getIntent(PublicListActivity.this, formid);
-                intent.putExtra("title", title);
-                intent.putExtra("formid", formid);
-                startActivityForResult(intent, 0);
+                if (intent != null) {
+                    intent.putExtra("title", title);
+                    intent.putExtra("formid", formid);
+                    startActivityForResult(intent, 0);
+                }
                 break;
         }
     }

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bottom_review"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/dp_40"
+    android:layout_gravity="bottom"
+    android:background="@color/white"
+    android:visibility="gone">
+
+    <TextView
+        android:id="@+id/tv_agree"
+        android:layout_width="@dimen/dp_80"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/bg_blue_btn"
+        android:gravity="center"
+        android:text="同意"
+        android:textColor="@color/white"
+        android:textSize="@dimen/sp_16" />
+
+    <TextView
+        android:id="@+id/tv_disagree"
+        android:layout_width="@dimen/dp_80"
+        android:layout_height="match_parent"
+        android:layout_toStartOf="@+id/tv_agree"
+        android:background="@drawable/btn_cancel"
+        android:gravity="center"
+        android:text="退回"
+        android:textColor="@color/colorAccent"
+        android:textSize="@dimen/sp_16" />
+
+    <View
+        android:id="@+id/line"
+        android:layout_width="@dimen/dp_0_5"
+        android:layout_height="match_parent"
+        android:layout_toStartOf="@+id/tv_disagree"
+        android:background="@color/default_bg_color" />
+</RelativeLayout>

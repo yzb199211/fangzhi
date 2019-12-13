@@ -16,6 +16,9 @@
         <activity android:name=".exchange.ExchangeActivity"></activity>
         <activity android:name=".count.CountActivity" />
         <activity android:name=".output.OutputDetailInnerActivity" />
+        <activity android:name=".lookup.LookUpActivity" />
+        <activity android:name=".form.FormConditionActivity" />
+        <activity android:name=".form.FormListActivity" />
         <activity
             android:name=".login.LoginActivity"
             android:screenOrientation="portrait"

@@ -8,4 +8,6 @@ public class NetConfig {
     public final static String PDAHandler = "PDAHandler.ashx";
     public final static String ReportHandler_Method = "MobileReportHandler.ashx";
     public final static String MobileFormHandler = "MobileFormHandler.ashx";
+    public final static String MobileHandler_Method = "MobileHandler.ashx";
+
 }
