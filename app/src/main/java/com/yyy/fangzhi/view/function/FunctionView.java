@@ -117,7 +117,6 @@ public class FunctionView extends LinearLayout {
 
     private void addStyle() {
         LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, context.getResources().getDimensionPixelOffset(R.dimen.dp_40));
-//        params.height = context.getResources().getDimensionPixelOffset(R.dimen.dp_40);
         setPadding(context.getResources().getDimensionPixelOffset(R.dimen.dp_10), context.getResources().getDimensionPixelOffset(R.dimen.dp_10), context.getResources().getDimensionPixelOffset(R.dimen.dp_10), context.getResources().getDimensionPixelOffset(R.dimen.dp_10));
         params.topMargin = context.getResources().getDimensionPixelOffset(R.dimen.dp_1);
         setLayoutParams(params);

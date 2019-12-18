@@ -30,6 +30,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class FormConditionActivity extends BaseActivity {
+
     private static final String TAG = "FormConditionActivity";
     private static final int BASE_CODE = 500;
     @BindView(R.id.iv_back)
@@ -93,7 +94,6 @@ public class FormConditionActivity extends BaseActivity {
             bottonView.setVisibility(View.VISIBLE);
             for (int i = 0; i < conditions.size(); i++) {
                 FunctionView view = new FunctionView(this);
-//        view.setView_type("S");
                 view.setTitle(conditions.get(i).getSCaption());
                 view.setHint("请输入" + conditions.get(i).getSCaption());
                 view.setText(TextUtils.isEmpty(conditions.get(i).getSValue()) ? "" : conditions.get(i).getSValue());
