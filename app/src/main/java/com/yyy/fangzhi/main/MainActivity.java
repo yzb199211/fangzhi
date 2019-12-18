@@ -2,6 +2,7 @@ package com.yyy.fangzhi.main;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -13,6 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.yyy.fangzhi.R;
 import com.yyy.fangzhi.dialog.LoadingDialog;
+import com.yyy.fangzhi.form.FormListActivity;
 import com.yyy.fangzhi.interfaces.OnItemClickListener;
 import com.yyy.fangzhi.interfaces.ResponseListener;
 import com.yyy.fangzhi.pubilc.PublicListActivity;
@@ -106,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(String string) {
                 try {
+                    Log.e("data", string);
                     JSONObject jsonObject = new JSONObject(string);
                     if (jsonObject.optBoolean("success")) {
                         List<MenuData> datas = new Gson().fromJson(jsonObject.optString("menus"), new TypeToken<List<MenuData>>() {
@@ -136,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < datas.size(); i++) {
             for (int j = 0; j < datas.get(i).getChildMenus().size(); j++) {
                 MenuData.ChildMenusBean child = datas.get(i).getChildMenus().get(j);
-                MainMenu item = new MainMenu(child.getIFormID(), FontUtil.getImg(child.getSIcon()), child.getSMenuName());
+                MainMenu item = new MainMenu(child.getIFormID(), FontUtil.getImg(child.getSIcon()), child.getSMenuName(), child.getSAppStyle());
                 list.add(item);
             }
         }
@@ -157,15 +160,36 @@ public class MainActivity extends AppCompatActivity {
         menuUsualAdapter.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                goNext(list.get(position).getId(), list.get(position).getStr());
+                goNext(list.get(position));
+
             }
         });
     }
 
-    private void goNext(int id, String title) {
+    private void goNext(MainMenu mainMenu) {
+        switch (mainMenu.appStyle) {
+            case "自定义":
+                goNextList(mainMenu.getId(), mainMenu.getStr());
+                break;
+            case "列表":
+                goNextForm(mainMenu.getId(), mainMenu.getStr());
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void goNextList(int id, String title) {
         startActivity(new Intent()
                 .setClass(MainActivity.this, PublicListActivity.class
-                ).putExtra("formid", id )
+                ).putExtra("formid", id)
+                .putExtra("title", title));
+    }
+
+    private void goNextForm(int id, String title) {
+        startActivity(new Intent()
+                .setClass(MainActivity.this, FormListActivity.class
+                ).putExtra("menuid", id)
                 .putExtra("title", title));
     }
 

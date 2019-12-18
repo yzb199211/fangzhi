@@ -6,6 +6,7 @@ public class MainMenu {
     String imgStr;
     String str;
     int msg = 0;
+    String appStyle;
 
     public MainMenu(int id, String imgStr, String str, int msg) {
         this.id = id;
@@ -13,6 +14,13 @@ public class MainMenu {
         this.imgStr = imgStr;
         this.str = str;
         this.msg = msg;
+    }
+
+    public MainMenu(int id, int img, String str,String appStyle) {
+        this.id = id;
+        this.img = img;
+        this.str = str;
+        this.appStyle = appStyle;
     }
 
     public MainMenu(int id, int img, String str, int msg) {

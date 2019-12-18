@@ -76,6 +76,7 @@ public class FunctionView extends LinearLayout {
     private String lookupFilter;
     private String userid;
     private String address;
+    String companyCode;
 
     private Activity mActivity;
     TimePickerView timePicker;
@@ -92,6 +93,7 @@ public class FunctionView extends LinearLayout {
         this.context = context;
         sharedPreferencesHelper = new SharedPreferencesHelper(context, context.getString(R.string.preferenceCache));
         address = (String) sharedPreferencesHelper.getSharedPreference("address", "");
+        companyCode = (String) sharedPreferencesHelper.getSharedPreference("companyCode", "");
     }
 
     public FunctionView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
@@ -100,16 +102,29 @@ public class FunctionView extends LinearLayout {
 
 
     private void init() {
+        inflateView();
+        addStyle();
+        initView();
+        setView();
+
+    }
+
+    private void inflateView() {
         LayoutInflater.from(context).inflate(R.layout.select_view, this, true);
         setGravity(Gravity.CENTER_VERTICAL);
         setOrientation(HORIZONTAL);
+    }
+
+    private void addStyle() {
         LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, context.getResources().getDimensionPixelOffset(R.dimen.dp_40));
 //        params.height = context.getResources().getDimensionPixelOffset(R.dimen.dp_40);
         setPadding(context.getResources().getDimensionPixelOffset(R.dimen.dp_10), context.getResources().getDimensionPixelOffset(R.dimen.dp_10), context.getResources().getDimensionPixelOffset(R.dimen.dp_10), context.getResources().getDimensionPixelOffset(R.dimen.dp_10));
         params.topMargin = context.getResources().getDimensionPixelOffset(R.dimen.dp_1);
         setLayoutParams(params);
         setBackgroundColor(context.getResources().getColor(R.color.white));
+    }
 
+    private void initView() {
         tvTitle = findViewById(R.id.tv_title);
         tvContent = findViewById(R.id.tv_content);
         etContent = findViewById(R.id.et_content);
@@ -118,8 +133,6 @@ public class FunctionView extends LinearLayout {
         tvContent.setHint(TextUtils.isEmpty(hint) ? "" : hint);
         tvContent.setText(getDefaulText(context, text));
         this.text = getDefaulText(context, text);
-        setView();
-
     }
 
     private void setView() {
@@ -264,7 +277,7 @@ public class FunctionView extends LinearLayout {
     /*处理Lookup数据*/
     private void initLookupData(String tables, String keyReturn, String keyShow) throws JSONException, Exception {
 
-        Log.e("jsonArrayLength", keyReturn + ","+keyShow);
+        Log.e("jsonArrayLength", keyReturn + "," + keyShow);
         if (tables.contains(keyReturn) && tables.contains(keyShow)) {
             this.data = getLookupData(tables, keyReturn, keyShow);
             mActivity.runOnUiThread(new Runnable() {
@@ -287,6 +300,7 @@ public class FunctionView extends LinearLayout {
         params.add(new NetParams("otype", "GetLookUpData"));
         params.add(new NetParams("filters", lookupFilter));
         params.add(new NetParams("lookUpName", lookupName));
+        params.add(new NetParams("database", companyCode));
 //        Log.e("look",lookupName);
         return params;
     }

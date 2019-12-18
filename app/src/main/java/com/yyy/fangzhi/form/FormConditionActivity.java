@@ -42,7 +42,8 @@ public class FormConditionActivity extends BaseActivity {
     RelativeLayout bottonView;
     @BindView(R.id.tv_disagree)
     TextView tvDisagree;
-
+    @BindView(R.id.tv_agree)
+    TextView tvAgree;
     SharedPreferencesHelper preferencesHelper;
 
     private String userId;
@@ -74,6 +75,7 @@ public class FormConditionActivity extends BaseActivity {
         tvTitle.setText("筛选条件");
         tvDisagree.setVisibility(View.INVISIBLE);
         ivBack.setVisibility(View.VISIBLE);
+        tvAgree.setText(getResources().getString(R.string.submit));
 //        ivBack.setBackgroundResource(R.mipmap.icon_back);
         conditions = new ArrayList<>();
         viewList = new ArrayList<>();
@@ -120,11 +122,11 @@ public class FormConditionActivity extends BaseActivity {
                         conditions.get(i).setSelectValue(viewList.get(i).getText());
                     }
                 }
-                String data = LookupDataUtil.getConditionData(conditions,isStore);
+                String data = LookupDataUtil.getConditionData(conditions, isStore);
                 Intent intent = new Intent();
                 intent.putExtra("data", data);
-                intent.putExtra("isStore", LookupDataUtil.getConditionData(conditions,true));
-                intent.putExtra("noStore",LookupDataUtil.getConditionData(conditions,false));
+                intent.putExtra("isStore", LookupDataUtil.getConditionData(conditions, true));
+                intent.putExtra("noStore", LookupDataUtil.getConditionData(conditions, false));
                 setResult(code, intent);
                 finish();
                 break;

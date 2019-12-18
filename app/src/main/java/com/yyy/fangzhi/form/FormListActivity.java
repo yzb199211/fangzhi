@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -61,7 +62,8 @@ public class FormListActivity extends AppCompatActivity {
     XRecyclerView refreshList;
     @BindView(R.id.ll_tab)
     LinearLayout llTab;
-
+    @BindView(R.id.iv_right)
+    ImageView ivRight;
     LinearLayoutManager manager;
 
     int pagerIndex = 1;
@@ -73,6 +75,7 @@ public class FormListActivity extends AppCompatActivity {
 
     private String address;
     private String url;
+    String companyCode;
 
     boolean isStore;
 
@@ -103,6 +106,8 @@ public class FormListActivity extends AppCompatActivity {
     private void inti() {
         address = (String) preferencesHelper.getSharedPreference("address", "");
         url = address + NetConfig.server + NetConfig.ReportHandler_Method;
+        companyCode = (String) preferencesHelper.getSharedPreference("companyCode", "");
+
 
         styleList = new ArrayList<>();
         infoBeans = new ArrayList<>();
@@ -112,6 +117,9 @@ public class FormListActivity extends AppCompatActivity {
         conditions = new ArrayList<>();
         items = new ArrayList<>();
 
+
+        ivRight.setVisibility(View.GONE);
+        tvRight.setText(getResources().getString(R.string.select));
         manager = new LinearLayoutManager(this);
         manager.setOrientation(RecyclerView.VERTICAL);
         refreshList.setLayoutManager(manager);
@@ -127,7 +135,7 @@ public class FormListActivity extends AppCompatActivity {
         userId = (String) preferencesHelper.getSharedPreference("userid", "");
         Intent intent = getIntent();
         tvTitle.setText(TextUtils.isEmpty(intent.getStringExtra("title")) ? "" : intent.getStringExtra("title"));
-        menuId = intent.getStringExtra("menuid");
+        menuId = intent.getIntExtra("menuid", 0) + "";
         ivBack.setVisibility(View.VISIBLE);
         getData(false, false, pagerIndex);
     }
@@ -173,7 +181,7 @@ public class FormListActivity extends AppCompatActivity {
             @Override
             public void onSuccess(String string) {
                 try {
-
+                    Log.e("data", string);
                     JSONObject jsonObject = new JSONObject(string);
                     boolean isSuccess = jsonObject.getBoolean("success");
                     if (isSuccess) {
@@ -369,6 +377,7 @@ public class FormListActivity extends AppCompatActivity {
         }
         params.add(new NetParams("sort", ""));
         params.add(new NetParams("order", "asc"));
+        params.add(new NetParams("database", companyCode));
         return params;
     }
 
@@ -422,6 +431,7 @@ public class FormListActivity extends AppCompatActivity {
         params.add(new NetParams("iFormID", menuId));
         params.add(new NetParams("userid", userId));
         params.add(new NetParams("pageNo", pagerIndex + ""));
+        params.add(new NetParams("database", companyCode));
         return params;
     }
 

@@ -37,6 +37,7 @@ public class LookUpAdapter extends RecyclerView.Adapter<LookUpAdapter.VH> {
         return new VH(view);
     }
 
+
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
         holder.tvTitle.setText(TextUtils.isEmpty(list.get(position).getName()) ? "" : list.get(position).getName());
