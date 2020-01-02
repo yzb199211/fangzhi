@@ -108,7 +108,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(String string) {
                 try {
-                    Log.e("data", string);
                     JSONObject jsonObject = new JSONObject(string);
                     if (jsonObject.optBoolean("success")) {
                         List<MenuData> datas = new Gson().fromJson(jsonObject.optString("menus"), new TypeToken<List<MenuData>>() {

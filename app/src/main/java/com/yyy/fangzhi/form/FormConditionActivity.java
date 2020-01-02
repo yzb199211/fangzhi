@@ -77,7 +77,6 @@ public class FormConditionActivity extends BaseActivity {
         tvDisagree.setVisibility(View.INVISIBLE);
         ivBack.setVisibility(View.VISIBLE);
         tvAgree.setText(getResources().getString(R.string.submit));
-//        ivBack.setBackgroundResource(R.mipmap.icon_back);
         conditions = new ArrayList<>();
         viewList = new ArrayList<>();
         Intent intent = getIntent();

@@ -60,7 +60,6 @@ public class ConfigureView extends FrameLayout {
         setPadding(0, 0, 0, context.getResources().getDimensionPixelOffset(R.dimen.dp_10));
         measureView();
         setBackgroundColor(context.getResources().getColor(R.color.white));
-
         screenWidth = PxUtil.getWidth(context);
 
         paddingMiddle = context.getResources().getDimensionPixelOffset(R.dimen.dp_10);
@@ -92,13 +91,6 @@ public class ConfigureView extends FrameLayout {
         int row = -1;
 //        int itemWidth = (int) (screenWidth - tvStyleTitle.getPaddingLeft() * 2 - getPaddingLeft() * 2);
         int itemWidth = (int) (screenWidth);
-        //测量标题
-        tvStyleTitle.measure(w, h);
-        textSize = tvStyleTitle.getTextSize();
-        if (tvStyleTitle.getVisibility() == VISIBLE)
-            // 获取高度
-            height = tvStyleTitle.getMeasuredHeight();
-        int count;
         for (int i = 0; i < infoList.size(); i++) {
 
             ConfigureInfo item = infoList.get(i);
@@ -106,34 +98,20 @@ public class ConfigureView extends FrameLayout {
             if (row == -1)
                 row = item.getRow();
             ConfigureInfoView rivItem = setItem(item);
-            LinearLayout.LayoutParams params;
+//            LinearLayout.LayoutParams params;
+            LayoutParams params;
 //            params.width = context.getResources().getDimensionPixelOffset(R.dimen.dp_40);
 //            rivItem.getTvTitle().setLayoutParams(params);
             if (i + 1 < infoList.size() && row != infoList.get(i + 1).getRow())
-                params = new LinearLayout.LayoutParams((int) (itemWidth - width), ViewGroup.LayoutParams.WRAP_CONTENT);
+                params = new LayoutParams((int) (itemWidth - width), ViewGroup.LayoutParams.WRAP_CONTENT);
+//                params = new LayoutParams((int) (itemWidth - width), ViewGroup.LayoutParams.WRAP_CONTENT);
             else
-                params = new LinearLayout.LayoutParams((int) (itemWidth * (item.getWidthPercent())), ViewGroup.LayoutParams.WRAP_CONTENT);
+//                params = new LinearLayout.LayoutParams((int) (itemWidth * (item.getWidthPercent())), ViewGroup.LayoutParams.WRAP_CONTENT);
+                params = new LayoutParams((int) (itemWidth * (item.getWidthPercent())), ViewGroup.LayoutParams.WRAP_CONTENT);
 
             params.setMargins(width, height, 0, 0);
             rivItem.setLayoutParams(params);
 
-//            count = 1;
-//            if (count == 1 && (i + 1 < infoList.size() && row == infoList.get(i + 1).getRow())) {
-//                rivItem.setPadding(paddingleft, paddingTop, paddingMiddle, 0);
-//                count++;
-//            } else if (count == 1 && (i + 1 < infoList.size() && row != infoList.get(i + 1).getRow())) {
-//                rivItem.setPadding(paddingleft, paddingTop, paddingRight, 0);
-//                count = 1;
-//            } else if (count == 1 && i + 1 == infoList.size()) {
-//                rivItem.setPadding(paddingleft, paddingTop, paddingRight, 0);
-//                Log.e(TAG, i + "c");
-//            } else if ((i + 1 < infoList.size() && row != infoList.get(i + 1).getRow())) {
-//                rivItem.setPadding(paddingMiddle, paddingTop, paddingRight, 0);
-//                count = 1;
-//            } else {
-//                rivItem.setPadding(paddingMiddle, paddingTop, paddingMiddle, 0);
-//                count++;
-//            }
             rivItem = setPaddings(rivItem, row, i);
             addView(rivItem);
             rivItem.measure(w, h);
@@ -157,25 +135,6 @@ public class ConfigureView extends FrameLayout {
      */
     private ConfigureInfoView setPaddings(ConfigureInfoView rivItem, int row, int i) {
         int count = 1;
-
-//
-//        if (count == 1 && (i + 1 < infoList.size() && row == infoList.get(i + 1).getRow())) {
-//            rivItem.setPadding(0, paddingTop, 0, 0);
-//            count++;
-//        } else if (count == 1 && (i + 1 < infoList.size() && row != infoList.get(i + 1).getRow())) {
-//            rivItem.setPadding(0, paddingTop, 0, 0);
-//            count = 1;
-//        } else if (count == 1 && i + 1 == infoList.size()) {
-//            rivItem.setPadding(0, paddingTop, 0, 0);
-////            Log.e(TAG, i + "c");
-//        } else if ((i + 1 < infoList.size() && row != infoList.get(i + 1).getRow())) {
-//            rivItem.setPadding(0, paddingTop, 0, 0);
-//            count = 1;
-//        } else {
-//            rivItem.setPadding(0, paddingTop, 0, 0);
-//            count++;
-//        }
-
         if (count == 1 && (i + 1 < infoList.size() && row == infoList.get(i + 1).getRow())) {
             rivItem.setPadding(paddingleft, paddingTop, paddingMiddle, 0);
             count++;
@@ -238,36 +197,6 @@ public class ConfigureView extends FrameLayout {
     public void setPadding(int left, int top, int right, int bottom) {
         super.setPadding(left, top, right, bottom);
         invalidate();
-    }
-
-    /**
-     * 设置标题文字
-     *
-     * @param styleTitle
-     */
-    public void setStyleTitle(String styleTitle) {
-        this.styleTitle = styleTitle;
-        tvStyleTitle.setText(styleTitle);
-    }
-
-    /**
-     * 设置标题颜色
-     *
-     * @param styleTitleColor 颜色
-     */
-    public void setStyleTitleColor(int styleTitleColor) {
-        this.styleTitleColor = styleTitleColor;
-        tvStyleTitle.setTextColor(styleTitleColor);
-    }
-
-    /**
-     * 设置标题背景色
-     *
-     * @param styleTitleBackground 背景颜色
-     */
-    public void setStyleTitleBackground(int styleTitleBackground) {
-        this.styleTitleBackground = styleTitleBackground;
-        tvStyleTitle.setBackgroundColor(styleTitleBackground);
     }
 
 
